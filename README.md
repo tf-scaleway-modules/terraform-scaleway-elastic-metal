@@ -98,10 +98,24 @@ module "elastic_metal" {
       offer                       = "EM-B312X-SSD"
       os                          = "Ubuntu"
       os_version                  = "24.04 LTS (Noble Numbat)"
+      subscription_period         = "monthly"
       hostname                    = "db-01"
       description                 = "Database server"
       tags                        = ["database", "production"]
       reinstall_on_config_changes = false
+
+      # Attach to private networks (VPC)
+      private_networks = [
+        { id = "00000000-0000-0000-0000-000000000000" }
+      ]
+
+      # Server options (e.g., remote access)
+      options = [
+        {
+          id         = "00000000-0000-0000-0000-000000000000"
+          expires_at = "2025-12-31T23:59:59Z"
+        }
+      ]
     }
   }
 
@@ -142,6 +156,7 @@ Each server in the `servers` map accepts the following attributes:
 | `offer` | Server offer name (e.g., "EM-A115X-SSD") | `string` | - | yes |
 | `os` | Operating system name (e.g., "Ubuntu") | `string` | - | yes |
 | `os_version` | Operating system version (e.g., "24.04 LTS (Noble Numbat)") | `string` | `null` | no |
+| `subscription_period` | Billing period: "hourly" or "monthly" | `string` | `"hourly"` | no |
 | `hostname` | Server hostname (defaults to map key) | `string` | `null` | no |
 | `description` | Server description | `string` | `""` | no |
 | `tags` | Server-specific tags (merged with default_tags) | `list(string)` | `[]` | no |
@@ -155,6 +170,27 @@ Each server in the `servers` map accepts the following attributes:
 | `options` | List of server options | `list(object)` | `[]` | no |
 | `private_networks` | List of private networks to attach | `list(object)` | `[]` | no |
 | `flexible_ips` | List of flexible IPs to create and attach | `list(object)` | `[]` | no |
+
+### Private Network Configuration
+
+Each private network in the `private_networks` list accepts:
+
+| Attribute | Description | Type | Required |
+|-----------|-------------|------|:--------:|
+| `id` | Private network ID (from Scaleway VPC) | `string` | yes |
+
+> **Note:** Get private network IDs with: `scw vpc private-network list`
+
+### Server Options Configuration
+
+Each option in the `options` list accepts:
+
+| Attribute | Description | Type | Required |
+|-----------|-------------|------|:--------:|
+| `id` | Option ID (e.g., remote access, additional storage) | `string` | yes |
+| `expires_at` | Option expiration date (RFC3339 format) | `string` | no |
+
+> **Note:** Get available options from offer details: `scw baremetal offer get <offer-id>`
 
 ### Flexible IP Configuration
 

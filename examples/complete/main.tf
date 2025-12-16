@@ -53,11 +53,28 @@ module "elastic_metal" {
     #   offer                       = "EM-B312X-SSD"
     #   os                          = "Ubuntu"
     #   os_version                  = "24.04 LTS (Noble Numbat)" # Use 'scw baremetal os list' to see versions
-    #   subscription_period         = "hourly"
+    #   subscription_period         = "monthly"                  # Monthly billing for long-term servers
     #   hostname                    = "db-01"
     #   description                 = "Database server"
     #   tags                        = ["database", "production"]
     #   reinstall_on_config_changes = false
+    #
+    #   # Attach to private networks (VPC)
+    #   # Get private network IDs with: scw vpc private-network list
+    #   private_networks = [
+    #     {
+    #       id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    #     }
+    #   ]
+    #
+    #   # Server options (e.g., remote access, additional storage)
+    #   # Get option IDs from offer details: scw baremetal offer get <offer-id>
+    #   options = [
+    #     {
+    #       id         = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    #       expires_at = "2025-12-31T23:59:59Z" # Optional expiration
+    #     }
+    #   ]
     # }
   }
 
@@ -70,9 +87,9 @@ module "elastic_metal" {
   # Then copy the content of ~/.ssh/id_ed25519.pub here
   ssh_keys = {
     # Uncomment and add your real SSH public key:
-    # admin = {
-    #   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... your-real-key"
-    # }
+    admin = {
+      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGKYuZIcf54r6zoYDGc71Syt6CzUIuwtxSC55yrWpa7 test@leminnov.cloud"
+    }
   }
 
   default_tags = ["managed-by-terraform", "environment:production"]
