@@ -1,7 +1,4 @@
 locals {
-  # Pre-computed SSH key IDs from existing keys (created keys added in resource)
-  default_ssh_key_ids = var.default_ssh_key_ids
-
   servers = {
     for name, config in var.servers : name => merge(config, {
       hostname             = coalesce(config.hostname, name)
