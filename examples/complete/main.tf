@@ -24,7 +24,7 @@ module "elastic_metal" {
       flexible_ips = [
         {
           description = "Primary failover IP"
-          reverse     = "web-01.example.com"
+          reverse     = "web-01.example.com."
         }
       ]
     }
@@ -40,7 +40,7 @@ module "elastic_metal" {
       flexible_ips = [
         {
           description = "Primary failover IP"
-          reverse     = "web-02.example.com"
+          reverse     = "web-02.example.com."
         },
         {
           description = "IPv6 address"
