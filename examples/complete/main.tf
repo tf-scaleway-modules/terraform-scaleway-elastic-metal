@@ -8,7 +8,7 @@
 module "elastic_metal" {
   source = "../.."
 
-  organization_id = "f3d8393e-008a-4fb2-a4ff-81b6fe5c01b0"
+  organization_id = "00000000-0000-0000-0000-000000000000"
   project_name    = "default"
   zone            = "fr-par-2"
 
@@ -81,7 +81,7 @@ module "elastic_metal" {
   ssh_keys = {
     # Uncomment and add your real SSH public key:
     admin = {
-      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDGKYuZIcf54r6zoYDGc71Syt6CzUIuwtxSC55yrWpa7 test@leminnov.cloud"
+      public_key = "ssh-ed25519 sdfsdfsdfsdfsdfiuosdfsdfsdfsdfsdfiuoss test@leminnov.cloud"
     }
   }
 
