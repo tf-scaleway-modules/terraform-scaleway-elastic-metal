@@ -1,9 +1,9 @@
 # provider "scaleway" {
-#   zone = "fr-par-2"
+#   zone = "fr-par-1"
 # }
 
 # To list available offers, run:
-# scw baremetal offer list zone=fr-par-2
+# scw baremetal offer list zone=fr-par-1
 
 module "elastic_metal" {
   source = "../.."
@@ -14,10 +14,10 @@ module "elastic_metal" {
 
   servers = {
     web-01 = {
-      offer               = "EM-A116X-SSD" # Check available offers with: scw baremetal offer list
-      os                  = "Ubuntu"       # Check available OS with: scw baremetal os list zone=fr-par-1
-      os_version          = "22.04 LTS"    # Optional: specific OS version
-      subscription_period = "hourly"       # Options: "hourly" or "monthly"
+      offer               = "EM-A116X-SSD"             # Check available offers with: scw baremetal offer list
+      os                  = "Ubuntu"                   # Check available OS with: scw baremetal os list zone=fr-par-1
+      os_version          = "24.04 LTS (Noble Numbat)" # Optional: use 'scw baremetal os list' to see versions
+      subscription_period = "hourly"                   # Options: "hourly" or "monthly"
       hostname            = "web-01"
       description         = "Web server 01"
       tags                = ["web", "production"]
@@ -32,6 +32,7 @@ module "elastic_metal" {
     # web-02 = {
     #   offer               = "EM-A210R-HDD"
     #   os                  = "Ubuntu"
+    #   os_version          = "22.04 LTS (Jammy Jellyfish)" # Use 'scw baremetal os list' to see versions
     #   subscription_period = "hourly"
     #   hostname            = "web-02"
     #   description         = "Web server 02"
@@ -51,7 +52,8 @@ module "elastic_metal" {
     # db-01 = {
     #   offer                       = "EM-B312X-SSD"
     #   os                          = "Ubuntu"
-    #   subscription_period         = "hourly" # Monthly billing for long-term database server
+    #   os_version                  = "24.04 LTS (Noble Numbat)" # Use 'scw baremetal os list' to see versions
+    #   subscription_period         = "hourly"
     #   hostname                    = "db-01"
     #   description                 = "Database server"
     #   tags                        = ["database", "production"]
@@ -60,7 +62,7 @@ module "elastic_metal" {
   }
 
   # Option 1: Reference existing SSH keys by ID
-  default_ssh_key_ids = ["xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+  default_ssh_key_ids = []
 
   # Option 2: Create new SSH keys (attached to all servers)
   ssh_keys = {

@@ -63,7 +63,7 @@ module "elastic_metal" {
     web-01 = {
       offer       = "EM-A210R-HDD"
       os          = "Ubuntu"
-      os_version  = "22.04 LTS"
+      os_version  = "22.04 LTS (Jammy Jellyfish)"
       hostname    = "web-01"
       description = "Web server 01"
       tags        = ["web", "production"]
@@ -78,7 +78,7 @@ module "elastic_metal" {
     web-02 = {
       offer       = "EM-A210R-HDD"
       os          = "Ubuntu"
-      os_version  = "22.04 LTS"
+      os_version  = "22.04 LTS (Jammy Jellyfish)"
       hostname    = "web-02"
       description = "Web server 02"
       tags        = ["web", "production"]
@@ -97,7 +97,7 @@ module "elastic_metal" {
     db-01 = {
       offer                       = "EM-B312X-SSD"
       os                          = "Ubuntu"
-      os_version                  = "24.04 LTS"
+      os_version                  = "24.04 LTS (Noble Numbat)"
       hostname                    = "db-01"
       description                 = "Database server"
       tags                        = ["database", "production"]
@@ -141,7 +141,7 @@ Each server in the `servers` map accepts the following attributes:
 |-----------|-------------|------|---------|:--------:|
 | `offer` | Server offer name (e.g., "EM-A115X-SSD") | `string` | - | yes |
 | `os` | Operating system name (e.g., "Ubuntu") | `string` | - | yes |
-| `os_version` | Operating system version (e.g., "22.04 LTS") | `string` | `null` | no |
+| `os_version` | Operating system version (e.g., "24.04 LTS (Noble Numbat)") | `string` | `null` | no |
 | `hostname` | Server hostname (defaults to map key) | `string` | `null` | no |
 | `description` | Server description | `string` | `""` | no |
 | `tags` | Server-specific tags (merged with default_tags) | `list(string)` | `[]` | no |

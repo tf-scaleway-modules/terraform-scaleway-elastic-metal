@@ -12,6 +12,7 @@ opentofu = '1.11'
 terraform-docs = '0.21.0'
 tflint = '0.56.0'
 python = '3.13'
+scaleway-cli = 'latest'
 
 [tasks.rm-cache]
 run = 'find . -type d -name ".terramate-cache" -prune -exec rm -rf {} \;'

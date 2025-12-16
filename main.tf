@@ -29,7 +29,7 @@ resource "scaleway_baremetal_server" "this" {
 
   # Hardware and OS configuration
   offer = data.scaleway_baremetal_offer.this[each.key].offer_id
-  os    = data.scaleway_baremetal_os.this[each.key].os_id
+  os    = element(split("/", data.scaleway_baremetal_os.this[each.key].os_id), 1)
 
   # SSH access configuration
   ssh_key_ids = distinct(concat(
