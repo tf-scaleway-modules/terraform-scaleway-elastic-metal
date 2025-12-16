@@ -1,3 +1,7 @@
+#--------------------------------------------------------------
+# SSH Keys
+#--------------------------------------------------------------
+
 resource "scaleway_iam_ssh_key" "this" {
   for_each = var.ssh_keys
 
@@ -7,33 +11,43 @@ resource "scaleway_iam_ssh_key" "this" {
   project_id = var.project_id
 }
 
+#--------------------------------------------------------------
+# Elastic Metal Servers
+#--------------------------------------------------------------
+
 resource "scaleway_baremetal_server" "this" {
   for_each = local.servers
 
   zone       = var.zone
   project_id = var.project_id
 
+  # Server identification
   name        = each.value.hostname
   hostname    = each.value.hostname
   description = each.value.description
   tags        = each.value.tags
 
+  # Hardware and OS configuration
   offer = data.scaleway_baremetal_offer.this[each.key].offer_id
   os    = data.scaleway_baremetal_os.this[each.key].os_id
 
+  # SSH access configuration
   ssh_key_ids = distinct(concat(
     each.value.existing_ssh_key_ids,
     [for key in scaleway_iam_ssh_key.this : key.id]
   ))
   install_config_afterward = each.value.install_config_afterward
 
+  # Installation credentials
   service_user     = each.value.service_user
   service_password = each.value.service_password
   user             = each.value.user
   password         = each.value.password
 
+  # Lifecycle configuration
   reinstall_on_config_changes = each.value.reinstall_on_config_changes
 
+  # Server options
   dynamic "options" {
     for_each = each.value.options
     content {
@@ -42,6 +56,7 @@ resource "scaleway_baremetal_server" "this" {
     }
   }
 
+  # Private network attachments
   dynamic "private_network" {
     for_each = each.value.private_networks
     content {
@@ -49,12 +64,17 @@ resource "scaleway_baremetal_server" "this" {
     }
   }
 
+  # Operation timeouts
   timeouts {
     create = var.timeouts.create
     update = var.timeouts.update
     delete = var.timeouts.delete
   }
 }
+
+#--------------------------------------------------------------
+# Flexible IPs
+#--------------------------------------------------------------
 
 resource "scaleway_flexible_ip" "this" {
   for_each = local.flexible_ips

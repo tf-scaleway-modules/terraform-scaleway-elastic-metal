@@ -1,4 +1,9 @@
 locals {
+  #--------------------------------------------------------------
+  # Server Configuration Processing
+  # Merges default values with per-server configuration
+  #--------------------------------------------------------------
+
   servers = {
     for name, config in var.servers : name => merge(config, {
       hostname             = coalesce(config.hostname, name)
@@ -6,6 +11,11 @@ locals {
       existing_ssh_key_ids = distinct(concat(var.default_ssh_key_ids, coalesce(config.ssh_key_ids, [])))
     })
   }
+
+  #--------------------------------------------------------------
+  # Flexible IP Flattening
+  # Creates a flat map of flexible IPs for for_each iteration
+  #--------------------------------------------------------------
 
   flexible_ips = merge([
     for server_name, config in var.servers : {

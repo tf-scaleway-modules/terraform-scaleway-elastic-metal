@@ -1,3 +1,7 @@
+#--------------------------------------------------------------
+# Server Configuration
+#--------------------------------------------------------------
+
 variable "servers" {
   description = "Map of Elastic Metal servers to create"
   type = map(object({
@@ -35,6 +39,10 @@ variable "servers" {
   }
 }
 
+#--------------------------------------------------------------
+# Provider Configuration
+#--------------------------------------------------------------
+
 variable "zone" {
   description = "Zone where Elastic Metal servers will be deployed"
   type        = string
@@ -51,6 +59,10 @@ variable "project_id" {
   type        = string
   default     = null
 }
+
+#--------------------------------------------------------------
+# SSH Key Configuration
+#--------------------------------------------------------------
 
 variable "default_ssh_key_ids" {
   description = "Default list of existing SSH key IDs to attach to all servers (merged with per-server ssh_key_ids)"
@@ -71,6 +83,10 @@ variable "ssh_keys" {
     error_message = "All public keys must be valid SSH public keys (ssh-rsa, ssh-ed25519, or ecdsa)."
   }
 }
+
+#--------------------------------------------------------------
+# Default Values
+#--------------------------------------------------------------
 
 variable "default_tags" {
   description = "Default tags to apply to all servers (merged with per-server tags)"
