@@ -19,22 +19,29 @@ A production-ready Terraform module for creating and managing **Scaleway Elastic
 
 ## Usage
 
+> **Note:** To list available Elastic Metal offers in your zone, run:
+> ```bash
+> scw baremetal offer list zone=fr-par-2
+> ```
+
 ### Minimal Example
 
 ```hcl
 module "elastic_metal" {
   source = "path/to/module"
 
-  zone = "fr-par-2"
+  organization_id = "00000000-0000-0000-0000-000000000000"
+  project_name    = "default"
+  zone            = "fr-par-2"
 
   servers = {
     web-server = {
-      offer = "EM-A115X-SSD"
+      offer = "EM-A210R-HDD"  # Use: scw baremetal offer list
       os    = "Ubuntu"
     }
   }
 
-  default_ssh_key_ids = ["xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+  default_ssh_key_ids = ["00000000-0000-0000-0000-000000000000"]
 }
 ```
 
@@ -44,12 +51,13 @@ module "elastic_metal" {
 module "elastic_metal" {
   source = "path/to/module"
 
-  zone       = "fr-par-2"
-  project_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  organization_id = "00000000-0000-0000-0000-000000000000"
+  project_name    = "my-project"
+  zone            = "fr-par-2"
 
   servers = {
     web-01 = {
-      offer       = "EM-A115X-SSD"
+      offer       = "EM-A210R-HDD"
       os          = "Ubuntu"
       hostname    = "web-01"
       description = "Web server 01"
@@ -63,7 +71,7 @@ module "elastic_metal" {
     }
 
     web-02 = {
-      offer       = "EM-A115X-SSD"
+      offer       = "EM-A210R-HDD"
       os          = "Ubuntu"
       hostname    = "web-02"
       description = "Web server 02"
@@ -81,7 +89,7 @@ module "elastic_metal" {
     }
 
     db-01 = {
-      offer                       = "EM-A410X-SSD"
+      offer                       = "EM-B312X-SSD"
       os                          = "Ubuntu"
       hostname                    = "db-01"
       description                 = "Database server"
@@ -91,7 +99,7 @@ module "elastic_metal" {
   }
 
   # Option 1: Reference existing SSH keys by ID
-  default_ssh_key_ids = ["xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+  default_ssh_key_ids = ["00000000-0000-0000-0000-000000000000"]
 
   # Option 2: Create new SSH keys (attached to all servers)
   ssh_keys = {
@@ -193,6 +201,7 @@ No modules.
 | [scaleway_baremetal_server.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/baremetal_server) | resource |
 | [scaleway_flexible_ip.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/flexible_ip) | resource |
 | [scaleway_iam_ssh_key.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/iam_ssh_key) | resource |
+| [scaleway_account_project.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/data-sources/account_project) | data source |
 | [scaleway_baremetal_offer.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/data-sources/baremetal_offer) | data source |
 | [scaleway_baremetal_os.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/data-sources/baremetal_os) | data source |
 
@@ -202,7 +211,8 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_default_ssh_key_ids"></a> [default\_ssh\_key\_ids](#input\_default\_ssh\_key\_ids) | Default list of existing SSH key IDs to attach to all servers (merged with per-server ssh\_key\_ids) | `list(string)` | `[]` | no |
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | Default tags to apply to all servers (merged with per-server tags) | `list(string)` | `[]` | no |
-| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | Scaleway Project ID. If not set, the provider's default project will be used | `string` | `null` | no |
+| <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | Scaleway organization ID | `string` | n/a | yes |
+| <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the Scaleway project | `string` | `"default"` | no |
 | <a name="input_servers"></a> [servers](#input\_servers) | Map of Elastic Metal servers to create | <pre>map(object({<br/>    offer                       = string<br/>    os                          = string<br/>    hostname                    = optional(string)<br/>    description                 = optional(string, "")<br/>    tags                        = optional(list(string), [])<br/>    ssh_key_ids                 = optional(list(string), [])<br/>    install_config_afterward    = optional(bool, false)<br/>    service_user                = optional(string)<br/>    service_password            = optional(string)<br/>    user                        = optional(string)<br/>    password                    = optional(string)<br/>    reinstall_on_config_changes = optional(bool, false)<br/>    options = optional(list(object({<br/>      id         = string<br/>      expires_at = optional(string)<br/>    })), [])<br/>    private_networks = optional(list(object({<br/>      id = string<br/>    })), [])<br/>    flexible_ips = optional(list(object({<br/>      description = optional(string)<br/>      tags        = optional(list(string), [])<br/>      reverse     = optional(string)<br/>      is_ipv6     = optional(bool, false)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
 | <a name="input_ssh_keys"></a> [ssh\_keys](#input\_ssh\_keys) | Map of SSH keys to create and attach to all servers | <pre>map(object({<br/>    public_key = string<br/>    disabled   = optional(bool, false)<br/>  }))</pre> | `{}` | no |
 | <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | Timeout configuration for server operations | <pre>object({<br/>    create = optional(string, "1h")<br/>    update = optional(string, "1h")<br/>    delete = optional(string, "1h")<br/>  })</pre> | `{}` | no |
@@ -215,6 +225,7 @@ No modules.
 | <a name="output_flexible_ip_addresses"></a> [flexible\_ip\_addresses](#output\_flexible\_ip\_addresses) | Map of server names to their flexible IP addresses |
 | <a name="output_flexible_ips"></a> [flexible\_ips](#output\_flexible\_ips) | Map of all Flexible IP resources |
 | <a name="output_offers"></a> [offers](#output\_offers) | Map of server names to their resolved offer details |
+| <a name="output_project_id"></a> [project\_id](#output\_project\_id) | The Scaleway project ID |
 | <a name="output_server_ids"></a> [server\_ids](#output\_server\_ids) | Map of server names to their IDs |
 | <a name="output_server_ips"></a> [server\_ips](#output\_server\_ips) | Map of server names to their public IPv4 addresses |
 | <a name="output_server_ipv6s"></a> [server\_ipv6s](#output\_server\_ipv6s) | Map of server names to their public IPv6 addresses |

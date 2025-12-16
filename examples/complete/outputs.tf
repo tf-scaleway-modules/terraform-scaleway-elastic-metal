@@ -1,3 +1,8 @@
+output "project_id" {
+  description = "The resolved Scaleway project ID"
+  value       = module.elastic_metal.project_id
+}
+
 output "server_ids" {
   description = "IDs of the created servers"
   value       = module.elastic_metal.server_ids

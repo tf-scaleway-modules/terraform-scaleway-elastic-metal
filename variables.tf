@@ -1,4 +1,35 @@
 #--------------------------------------------------------------
+# Provider Configuration
+#--------------------------------------------------------------
+
+variable "organization_id" {
+  description = "Scaleway organization ID"
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.organization_id))
+    error_message = "Organization ID must be a valid UUID."
+  }
+}
+
+variable "project_name" {
+  description = "Name of the Scaleway project"
+  type        = string
+  default     = "default"
+}
+
+variable "zone" {
+  description = "Zone where Elastic Metal servers will be deployed"
+  type        = string
+  default     = "fr-par-2"
+
+  validation {
+    condition     = can(regex("^[a-z]{2}-[a-z]{3}-[0-9]$", var.zone))
+    error_message = "Zone must be in format: xx-xxx-N (e.g., fr-par-2)."
+  }
+}
+
+#--------------------------------------------------------------
 # Server Configuration
 #--------------------------------------------------------------
 
@@ -37,27 +68,6 @@ variable "servers" {
     condition     = alltrue([for k, v in var.servers : can(regex("^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$", k)) || length(k) == 1])
     error_message = "Server keys must be valid identifiers (alphanumeric and hyphens, not starting or ending with hyphen)."
   }
-}
-
-#--------------------------------------------------------------
-# Provider Configuration
-#--------------------------------------------------------------
-
-variable "zone" {
-  description = "Zone where Elastic Metal servers will be deployed"
-  type        = string
-  default     = "fr-par-2"
-
-  validation {
-    condition     = can(regex("^[a-z]{2}-[a-z]{3}-[0-9]$", var.zone))
-    error_message = "Zone must be in format: xx-xxx-N (e.g., fr-par-2)."
-  }
-}
-
-variable "project_id" {
-  description = "Scaleway Project ID. If not set, the provider's default project will be used"
-  type        = string
-  default     = null
 }
 
 #--------------------------------------------------------------

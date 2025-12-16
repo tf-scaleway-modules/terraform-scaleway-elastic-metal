@@ -1,16 +1,20 @@
-provider "scaleway" {
-  zone = "fr-par-2"
-}
+# provider "scaleway" {
+#   zone = "fr-par-2"
+# }
+
+# To list available offers, run:
+# scw baremetal offer list zone=fr-par-2
 
 module "elastic_metal" {
   source = "../.."
 
-  zone       = "fr-par-2"
-  project_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  organization_id = "f3d8393e-008a-4fb2-a4ff-81b6fe5c01b0"
+  project_name    = "default"
+  zone            = "fr-par-1"
 
   servers = {
     web-01 = {
-      offer       = "EM-A115X-SSD"
+      offer       = "EM-A210R-HDD" # Check available offers with: scw baremetal offer list
       os          = "Ubuntu"
       hostname    = "web-01"
       description = "Web server 01"
@@ -24,7 +28,7 @@ module "elastic_metal" {
     }
 
     web-02 = {
-      offer       = "EM-A115X-SSD"
+      offer       = "EM-A210R-HDD"
       os          = "Ubuntu"
       hostname    = "web-02"
       description = "Web server 02"
@@ -42,7 +46,7 @@ module "elastic_metal" {
     }
 
     db-01 = {
-      offer                       = "EM-A410X-SSD"
+      offer                       = "EM-B312X-SSD"
       os                          = "Ubuntu"
       hostname                    = "db-01"
       description                 = "Database server"

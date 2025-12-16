@@ -8,7 +8,7 @@ resource "scaleway_iam_ssh_key" "this" {
   name       = each.key
   public_key = each.value.public_key
   disabled   = each.value.disabled
-  project_id = var.project_id
+  project_id = data.scaleway_account_project.this.id
 }
 
 #--------------------------------------------------------------
@@ -19,7 +19,7 @@ resource "scaleway_baremetal_server" "this" {
   for_each = local.servers
 
   zone       = var.zone
-  project_id = var.project_id
+  project_id = data.scaleway_account_project.this.id
 
   # Server identification
   name        = each.value.hostname
@@ -80,7 +80,7 @@ resource "scaleway_flexible_ip" "this" {
   for_each = local.flexible_ips
 
   zone       = var.zone
-  project_id = var.project_id
+  project_id = data.scaleway_account_project.this.id
   server_id  = scaleway_baremetal_server.this[each.value.server_name].id
 
   description = each.value.description
