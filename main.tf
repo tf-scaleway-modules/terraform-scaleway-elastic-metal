@@ -64,6 +64,9 @@ resource "scaleway_baremetal_server" "this" {
     }
   }
 
+  # Ensure SSH keys are created before the server
+  depends_on = [scaleway_iam_ssh_key.this]
+
   # Operation timeouts
   timeouts {
     create = var.timeouts.create

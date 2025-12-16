@@ -10,7 +10,7 @@ module "elastic_metal" {
 
   organization_id = "f3d8393e-008a-4fb2-a4ff-81b6fe5c01b0"
   project_name    = "default"
-  zone            = "fr-par-1"
+  zone            = "fr-par-2"
 
   servers = {
     web-01 = {
@@ -65,13 +65,14 @@ module "elastic_metal" {
   default_ssh_key_ids = []
 
   # Option 2: Create new SSH keys (attached to all servers)
+  # IMPORTANT: Replace with your real SSH public keys!
+  # Generate a key with: ssh-keygen -t ed25519 -C "your-email@example.com"
+  # Then copy the content of ~/.ssh/id_ed25519.pub here
   ssh_keys = {
-    admin = {
-      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExample admin@example.com"
-    }
-    deploy = {
-      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExample deploy@example.com"
-    }
+    # Uncomment and add your real SSH public key:
+    # admin = {
+    #   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... your-real-key"
+    # }
   }
 
   default_tags = ["managed-by-terraform", "environment:production"]
