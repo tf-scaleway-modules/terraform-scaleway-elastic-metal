@@ -34,8 +34,9 @@ variable "zone" {
 #--------------------------------------------------------------
 
 variable "servers" {
-  description = "Map of Elastic Metal servers to create"
+  description = "Map of Elastic Metal servers to create. Use 'count' to create multiple identical servers with indexed names."
   type = map(object({
+    count                       = optional(number, 1)
     offer                       = string
     os                          = string
     os_version                  = optional(string)
@@ -74,6 +75,11 @@ variable "servers" {
   validation {
     condition     = alltrue([for k, v in var.servers : contains(["hourly", "monthly"], coalesce(v.subscription_period, "hourly"))])
     error_message = "subscription_period must be either 'hourly' or 'monthly'."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.servers : coalesce(v.count, 1) >= 1 && coalesce(v.count, 1) <= 100])
+    error_message = "Server count must be between 1 and 100."
   }
 }
 
