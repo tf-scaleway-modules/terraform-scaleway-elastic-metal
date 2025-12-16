@@ -18,6 +18,11 @@ output "flexible_ip_addresses" {
   value       = module.elastic_metal.flexible_ip_addresses
 }
 
+output "ssh_key_ids" {
+  description = "IDs of created SSH keys"
+  value       = module.elastic_metal.ssh_key_ids
+}
+
 output "servers" {
   description = "Full server resources"
   value       = module.elastic_metal.servers

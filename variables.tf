@@ -53,9 +53,23 @@ variable "project_id" {
 }
 
 variable "default_ssh_key_ids" {
-  description = "Default list of SSH key IDs to attach to all servers (merged with per-server ssh_key_ids)"
+  description = "Default list of existing SSH key IDs to attach to all servers (merged with per-server ssh_key_ids)"
   type        = list(string)
   default     = []
+}
+
+variable "ssh_keys" {
+  description = "Map of SSH keys to create and attach to all servers"
+  type = map(object({
+    public_key = string
+    disabled   = optional(bool, false)
+  }))
+  default = {}
+
+  validation {
+    condition     = alltrue([for k, v in var.ssh_keys : can(regex("^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521|sk-ssh-ed25519@openssh.com|sk-ecdsa-sha2-nistp256@openssh.com)\\s+", v.public_key))])
+    error_message = "All public keys must be valid SSH public keys (ssh-rsa, ssh-ed25519, or ecdsa)."
+  }
 }
 
 variable "default_tags" {

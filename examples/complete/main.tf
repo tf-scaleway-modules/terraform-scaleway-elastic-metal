@@ -51,8 +51,20 @@ module "elastic_metal" {
     }
   }
 
+  # Option 1: Reference existing SSH keys by ID
   default_ssh_key_ids = ["xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
-  default_tags        = ["managed-by-terraform", "environment:production"]
+
+  # Option 2: Create new SSH keys (attached to all servers)
+  ssh_keys = {
+    admin = {
+      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExample admin@example.com"
+    }
+    deploy = {
+      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExample deploy@example.com"
+    }
+  }
+
+  default_tags = ["managed-by-terraform", "environment:production"]
 
   timeouts = {
     create = "2h"

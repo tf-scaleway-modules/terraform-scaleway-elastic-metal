@@ -1,3 +1,12 @@
+resource "scaleway_iam_ssh_key" "this" {
+  for_each = var.ssh_keys
+
+  name       = each.key
+  public_key = each.value.public_key
+  disabled   = each.value.disabled
+  project_id = var.project_id
+}
+
 resource "scaleway_baremetal_server" "this" {
   for_each = local.servers
 
@@ -12,7 +21,10 @@ resource "scaleway_baremetal_server" "this" {
   offer = data.scaleway_baremetal_offer.this[each.key].offer_id
   os    = data.scaleway_baremetal_os.this[each.key].os_id
 
-  ssh_key_ids              = each.value.ssh_key_ids
+  ssh_key_ids = distinct(concat(
+    each.value.existing_ssh_key_ids,
+    [for key in scaleway_iam_ssh_key.this : key.id]
+  ))
   install_config_afterward = each.value.install_config_afterward
 
   service_user     = each.value.service_user

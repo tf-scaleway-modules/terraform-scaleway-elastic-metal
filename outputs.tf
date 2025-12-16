@@ -54,3 +54,13 @@ output "flexible_ip_addresses" {
     ]
   }
 }
+
+output "ssh_keys" {
+  description = "Map of all created SSH key resources"
+  value       = scaleway_iam_ssh_key.this
+}
+
+output "ssh_key_ids" {
+  description = "Map of SSH key names to their IDs"
+  value       = { for name, key in scaleway_iam_ssh_key.this : name => key.id }
+}
