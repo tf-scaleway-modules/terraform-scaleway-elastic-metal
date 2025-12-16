@@ -29,25 +29,25 @@ module "elastic_metal" {
       ]
     }
 
-    # web-02 = {
-    #   offer               = "EM-A210R-HDD"
-    #   os                  = "Ubuntu"
-    #   os_version          = "22.04 LTS (Jammy Jellyfish)" # Use 'scw baremetal os list' to see versions
-    #   subscription_period = "hourly"
-    #   hostname            = "web-02"
-    #   description         = "Web server 02"
-    #   tags                = ["web", "production"]
-    #   flexible_ips = [
-    #     {
-    #       description = "Primary failover IP"
-    #       reverse     = "web-02.example.com"
-    #     },
-    #     {
-    #       description = "IPv6 address"
-    #       is_ipv6     = true
-    #     }
-    #   ]
-    # }
+    web-02 = {
+      offer               = "EM-A610R-NVME"
+      os                  = "Ubuntu"
+      os_version          = "24.04 LTS (Noble Numbat)" # Use 'scw baremetal os list' to see versions
+      subscription_period = "hourly"
+      hostname            = "web-02"
+      description         = "Web server 02"
+      tags                = ["web", "production"]
+      flexible_ips = [
+        {
+          description = "Primary failover IP"
+          reverse     = "web-02.example.com"
+        },
+        {
+          description = "IPv6 address"
+          is_ipv6     = true
+        }
+      ]
+    }
 
     # db-01 = {
     #   offer                       = "EM-B312X-SSD"
