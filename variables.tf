@@ -91,6 +91,11 @@ variable "default_ssh_key_ids" {
   description = "Default list of existing SSH key IDs to attach to all servers (merged with per-server ssh_key_ids)"
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for id in var.default_ssh_key_ids : can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", id))])
+    error_message = "All SSH key IDs must be valid UUIDs."
+  }
 }
 
 variable "ssh_keys" {

@@ -14,6 +14,7 @@ output "project_id" {
 output "servers" {
   description = "Map of all Elastic Metal server resources"
   value       = scaleway_baremetal_server.this
+  sensitive   = true
 }
 
 output "server_ids" {
@@ -57,6 +58,11 @@ output "offers" {
   value       = { for name, offer in data.scaleway_baremetal_offer.this : name => offer }
 }
 
+output "os_images" {
+  description = "Map of server names to their resolved OS details"
+  value       = { for name, os in data.scaleway_baremetal_os.this : name => os }
+}
+
 #--------------------------------------------------------------
 # Flexible IP Outputs
 #--------------------------------------------------------------
@@ -83,6 +89,7 @@ output "flexible_ip_addresses" {
 output "ssh_keys" {
   description = "Map of all created SSH key resources"
   value       = scaleway_iam_ssh_key.this
+  sensitive   = true
 }
 
 output "ssh_key_ids" {

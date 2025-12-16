@@ -73,6 +73,13 @@ resource "scaleway_baremetal_server" "this" {
     update = var.timeouts.update
     delete = var.timeouts.delete
   }
+
+  lifecycle {
+    precondition {
+      condition     = length(each.value.existing_ssh_key_ids) > 0 || length(var.ssh_keys) > 0
+      error_message = "At least one SSH key must be provided via 'default_ssh_key_ids', per-server 'ssh_key_ids', or 'ssh_keys'."
+    }
+  }
 }
 
 #--------------------------------------------------------------
