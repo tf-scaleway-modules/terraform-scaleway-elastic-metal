@@ -1,93 +1,297 @@
-# Scaleway Metal
+# Scaleway Elastic Metal Terraform Module
 
+[![Apache 2.0][apache-shield]][apache]
+[![Terraform][terraform-badge]][terraform-url]
+[![Scaleway Provider][scaleway-badge]][scaleway-url]
+[![Latest Release][release-badge]][release-url]
 
+A production-ready Terraform module for creating and managing **Scaleway Elastic Metal** (bare metal) servers with support for multiple instances, flexible IPs, SSH key management, and private networks.
 
-## Getting started
+## Features
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/leminnov/terraform/modules/scaleway-metal.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-* [Set up project integrations](https://gitlab.com/leminnov/terraform/modules/scaleway-metal/-/settings/integrations)
-
-## Collaborate with your team
-
-* [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+- **Multiple Servers** - Deploy and manage multiple Elastic Metal servers with a single module call
+- **Server Count** - Use `count` parameter to create multiple identical servers (e.g., `web` with `count=3` creates `web-01`, `web-02`, `web-03`)
+- **Flexible IPs** - Attach multiple IPv4/IPv6 flexible IPs per server for failover scenarios
+- **SSH Key Management** - Create new SSH keys or reference existing ones
+- **Private Networks** - Connect servers to Scaleway VPC private networks
+- **Server Options** - Configure additional server options with expiration dates
+- **Configurable Timeouts** - Customize create/update/delete operation timeouts
+- **Tag Inheritance** - Default tags automatically merged with per-server tags
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+> **Note:** To list available Elastic Metal offers and operating systems in your zone, run:
+> ```bash
+> # List available offers
+> scw baremetal offer list zone=fr-par-2
+>
+> # List available operating systems
+> scw baremetal os list zone=fr-par-2
+> ```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Minimal Example
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```hcl
+module "elastic_metal" {
+  source = "path/to/module"
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+  organization_id = "00000000-0000-0000-0000-000000000000"
+  project_name    = "default"
+  zone            = "fr-par-2"
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+  servers = {
+    web-server = {
+      offer = "EM-A210R-HDD"  # Use: scw baremetal offer list
+      os    = "Ubuntu"
+    }
+  }
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+  default_ssh_key_ids = ["00000000-0000-0000-0000-000000000000"]
+}
+```
+
+### Complete Example
+
+```hcl
+module "elastic_metal" {
+  source = "path/to/module"
+
+  organization_id = "00000000-0000-0000-0000-000000000000"
+  project_name    = "my-project"
+  zone            = "fr-par-2"
+
+  servers = {
+    # Using count to create multiple identical servers
+    # This creates: web-01, web-02, web-03
+    web = {
+      count               = 3  # Creates web-01, web-02, web-03
+      offer               = "EM-A210R-HDD"
+      os                  = "Ubuntu"
+      os_version          = "22.04 LTS (Jammy Jellyfish)"
+      description         = "Web server"  # Becomes "Web server 01", etc.
+      tags                = ["web", "production"]
+      flexible_ips = [
+        {
+          description = "Primary failover IP"
+        }
+      ]
+    }
+
+    # Single server (count = 1 is default)
+    api = {
+      offer       = "EM-A210R-HDD"
+      os          = "Ubuntu"
+      os_version  = "22.04 LTS (Jammy Jellyfish)"
+      hostname    = "api-gateway"  # Custom hostname
+      description = "API Gateway server"
+      tags        = ["api", "production"]
+    }
+
+    # Database cluster with count
+    db = {
+      count                       = 2  # Creates db-01, db-02
+      offer                       = "EM-B312X-SSD"
+      os                          = "Ubuntu"
+      os_version                  = "24.04 LTS (Noble Numbat)"
+      subscription_period         = "monthly"
+      description                 = "Database server"
+      tags                        = ["database", "production"]
+      reinstall_on_config_changes = false
+
+      # Attach to private networks (VPC)
+      private_networks = [
+        { id = "00000000-0000-0000-0000-000000000000" }
+      ]
+
+      # Server options (e.g., remote access)
+      options = [
+        {
+          id         = "00000000-0000-0000-0000-000000000000"
+          expires_at = "2025-12-31T23:59:59Z"
+        }
+      ]
+    }
+  }
+
+  # Option 1: Reference existing SSH keys by ID
+  default_ssh_key_ids = ["00000000-0000-0000-0000-000000000000"]
+
+  # Option 2: Create new SSH keys (attached to all servers)
+  ssh_keys = {
+    admin = {
+      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... admin@example.com"
+    }
+    deploy = {
+      public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... deploy@example.com"
+    }
+  }
+
+  default_tags = ["managed-by-terraform", "environment:production"]
+
+  timeouts = {
+    create = "2h"
+    update = "1h"
+    delete = "30m"
+  }
+}
+```
+
+More examples available in the [`examples/`](examples/) directory:
+
+- **[Minimal](examples/minimal/)** - Simplest configuration for quick start
+- **[Complete](examples/complete/)** - Full-featured production setup
+
+## Server Configuration
+
+Each server in the `servers` map accepts the following attributes:
+
+| Attribute | Description | Type | Default | Required |
+|-----------|-------------|------|---------|:--------:|
+| `count` | Number of identical servers to create (creates name-01, name-02, etc.) | `number` | `1` | no |
+| `offer` | Server offer name (e.g., "EM-A115X-SSD") | `string` | - | yes |
+| `os` | Operating system name (e.g., "Ubuntu") | `string` | - | yes |
+| `os_version` | Operating system version (e.g., "24.04 LTS (Noble Numbat)") | `string` | `null` | no |
+| `subscription_period` | Billing period: "hourly" or "monthly" | `string` | `"hourly"` | no |
+| `hostname` | Server hostname (defaults to map key, indexed if count > 1) | `string` | `null` | no |
+| `description` | Server description | `string` | `""` | no |
+| `tags` | Server-specific tags (merged with default_tags) | `list(string)` | `[]` | no |
+| `ssh_key_ids` | Additional SSH key IDs for this server | `list(string)` | `[]` | no |
+| `install_config_afterward` | Install configuration after server creation | `bool` | `false` | no |
+| `service_user` | Service user for installation | `string` | `null` | no |
+| `service_password` | Service password for installation | `string` | `null` | no |
+| `user` | Custom user for OS installation | `string` | `null` | no |
+| `password` | Custom password for OS installation | `string` | `null` | no |
+| `reinstall_on_config_changes` | Reinstall server when configuration changes | `bool` | `false` | no |
+| `options` | List of server options | `list(object)` | `[]` | no |
+| `private_networks` | List of private networks to attach | `list(object)` | `[]` | no |
+| `flexible_ips` | List of flexible IPs to create and attach | `list(object)` | `[]` | no |
+
+### Private Network Configuration
+
+Each private network in the `private_networks` list accepts:
+
+| Attribute | Description | Type | Required |
+|-----------|-------------|------|:--------:|
+| `id` | Private network ID (from Scaleway VPC) | `string` | yes |
+
+> **Note:** Get private network IDs with: `scw vpc private-network list`
+
+### Server Options Configuration
+
+Each option in the `options` list accepts:
+
+| Attribute | Description | Type | Required |
+|-----------|-------------|------|:--------:|
+| `id` | Option ID (e.g., remote access, additional storage) | `string` | yes |
+| `expires_at` | Option expiration date (RFC3339 format) | `string` | no |
+
+> **Note:** Get available options from offer details: `scw baremetal offer get <offer-id>`
+
+### Flexible IP Configuration
+
+Each flexible IP in the `flexible_ips` list accepts:
+
+| Attribute | Description | Type | Default |
+|-----------|-------------|------|---------|
+| `description` | Flexible IP description | `string` | `null` |
+| `tags` | Flexible IP tags (merged with default_tags) | `list(string)` | `[]` |
+| `reverse` | Reverse DNS hostname | `string` | `null` |
+| `is_ipv6` | Create IPv6 flexible IP instead of IPv4 | `bool` | `false` |
+
+### SSH Key Configuration
+
+Each SSH key in the `ssh_keys` map accepts:
+
+| Attribute | Description | Type | Default | Required |
+|-----------|-------------|------|---------|:--------:|
+| `public_key` | SSH public key content | `string` | - | yes |
+| `disabled` | Disable the SSH key | `bool` | `false` | no |
+
+### Timeouts Configuration
+
+| Attribute | Description | Default |
+|-----------|-------------|---------|
+| `create` | Timeout for server creation | `"1h"` |
+| `update` | Timeout for server updates | `"1h"` |
+| `delete` | Timeout for server deletion | `"1h"` |
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10.7 |
+| <a name="requirement_scaleway"></a> [scaleway](#requirement\_scaleway) | ~> 2.64 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_scaleway"></a> [scaleway](#provider\_scaleway) | 2.65.1 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [scaleway_baremetal_server.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/baremetal_server) | resource |
+| [scaleway_flexible_ip.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/flexible_ip) | resource |
+| [scaleway_iam_ssh_key.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/iam_ssh_key) | resource |
+| [scaleway_account_project.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/data-sources/account_project) | data source |
+| [scaleway_baremetal_offer.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/data-sources/baremetal_offer) | data source |
+| [scaleway_baremetal_os.this](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/data-sources/baremetal_os) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_default_ssh_key_ids"></a> [default\_ssh\_key\_ids](#input\_default\_ssh\_key\_ids) | Default list of existing SSH key IDs to attach to all servers (merged with per-server ssh\_key\_ids) | `list(string)` | `[]` | no |
+| <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | Default tags to apply to all servers (merged with per-server tags) | `list(string)` | `[]` | no |
+| <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | Scaleway organization ID | `string` | n/a | yes |
+| <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the Scaleway project | `string` | `"default"` | no |
+| <a name="input_servers"></a> [servers](#input\_servers) | Map of Elastic Metal servers to create | <pre>map(object({<br/>    offer                       = string<br/>    os                          = string<br/>    os_version                  = optional(string)<br/>    subscription_period         = optional(string, "hourly")<br/>    hostname                    = optional(string)<br/>    description                 = optional(string, "")<br/>    tags                        = optional(list(string), [])<br/>    ssh_key_ids                 = optional(list(string), [])<br/>    install_config_afterward    = optional(bool, false)<br/>    service_user                = optional(string)<br/>    service_password            = optional(string)<br/>    user                        = optional(string)<br/>    password                    = optional(string)<br/>    reinstall_on_config_changes = optional(bool, false)<br/>    options = optional(list(object({<br/>      id         = string<br/>      expires_at = optional(string)<br/>    })), [])<br/>    private_networks = optional(list(object({<br/>      id = string<br/>    })), [])<br/>    flexible_ips = optional(list(object({<br/>      description = optional(string)<br/>      tags        = optional(list(string), [])<br/>      reverse     = optional(string)<br/>      is_ipv6     = optional(bool, false)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_ssh_keys"></a> [ssh\_keys](#input\_ssh\_keys) | Map of SSH keys to create and attach to all servers | <pre>map(object({<br/>    public_key = string<br/>    disabled   = optional(bool, false)<br/>  }))</pre> | `{}` | no |
+| <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | Timeout configuration for server operations | <pre>object({<br/>    create = optional(string, "1h")<br/>    update = optional(string, "1h")<br/>    delete = optional(string, "1h")<br/>  })</pre> | `{}` | no |
+| <a name="input_zone"></a> [zone](#input\_zone) | Zone where Elastic Metal servers will be deployed | `string` | `"fr-par-2"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_flexible_ip_addresses"></a> [flexible\_ip\_addresses](#output\_flexible\_ip\_addresses) | Map of server names to their flexible IP addresses |
+| <a name="output_flexible_ips"></a> [flexible\_ips](#output\_flexible\_ips) | Map of all Flexible IP resources |
+| <a name="output_offers"></a> [offers](#output\_offers) | Map of server names to their resolved offer details |
+| <a name="output_project_id"></a> [project\_id](#output\_project\_id) | The Scaleway project ID |
+| <a name="output_server_ids"></a> [server\_ids](#output\_server\_ids) | Map of server names to their IDs |
+| <a name="output_server_ips"></a> [server\_ips](#output\_server\_ips) | Map of server names to their public IPv4 addresses |
+| <a name="output_server_ipv6s"></a> [server\_ipv6s](#output\_server\_ipv6s) | Map of server names to their public IPv6 addresses |
+| <a name="output_server_private_ips"></a> [server\_private\_ips](#output\_server\_private\_ips) | Map of server names to their private network IPs |
+| <a name="output_servers"></a> [servers](#output\_servers) | Map of all Elastic Metal server resources |
+| <a name="output_ssh_key_ids"></a> [ssh\_key\_ids](#output\_ssh\_key\_ids) | Map of SSH key names to their IDs |
+| <a name="output_ssh_keys"></a> [ssh\_keys](#output\_ssh\_keys) | Map of all created SSH key resources |
+<!-- END_TF_DOCS -->
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for full details.
+
+Copyright 2025 - This module is independently maintained and not affiliated with Scaleway.
+
+## Disclaimer
+
+This module is provided "as is" without warranty of any kind, express or implied. The authors and contributors are not responsible for any issues, damages, or losses arising from the use of this module. No official support is provided. Use at your own risk.
+
+[apache]: https://opensource.org/licenses/Apache-2.0
+[apache-shield]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+
+[terraform-badge]: https://img.shields.io/badge/Terraform-%3E%3D1.10-623CE4
+[terraform-url]: https://www.terraform.io
+
+[scaleway-badge]: https://img.shields.io/badge/Scaleway%20Provider-%3E%3D2.63-4f0599
+[scaleway-url]: https://registry.terraform.io/providers/scaleway/scaleway/
+
+[release-badge]: https://img.shields.io/gitlab/v/release/leminnov/terraform/modules/scaleway-elastic-metal?include_prereleases&sort=semver
+[release-url]: https://gitlab.com/leminnov/terraform/modules/scaleway-elastic-metal/-/releases
