@@ -69,9 +69,9 @@ output "flexible_ips" {
 output "flexible_ip_addresses" {
   description = "Map of server names to their flexible IP addresses"
   value = {
-    for name, config in var.servers : name => [
+    for name, server in scaleway_baremetal_server.this : name => [
       for key, fip in scaleway_flexible_ip.this : fip.ip_address
-      if startswith(key, "${name}-")
+      if startswith(key, "${name}-fip-")
     ]
   }
 }

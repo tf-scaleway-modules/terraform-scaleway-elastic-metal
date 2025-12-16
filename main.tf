@@ -27,9 +27,9 @@ resource "scaleway_baremetal_server" "this" {
   description = each.value.description
   tags        = each.value.tags
 
-  # Hardware and OS configuration
-  offer = data.scaleway_baremetal_offer.this[each.key].offer_id
-  os    = element(split("/", data.scaleway_baremetal_os.this[each.key].os_id), 1)
+  # Hardware and OS configuration (lookup by base_name for count > 1 support)
+  offer = data.scaleway_baremetal_offer.this[each.value.base_name].offer_id
+  os    = element(split("/", data.scaleway_baremetal_os.this[each.value.base_name].os_id), 1)
 
   # SSH access configuration
   ssh_key_ids = distinct(concat(
