@@ -16,8 +16,9 @@ data "scaleway_account_project" "this" {
 data "scaleway_baremetal_offer" "this" {
   for_each = local.servers
 
-  zone = var.zone
-  name = each.value.offer
+  zone                = var.zone
+  name                = each.value.offer
+  subscription_period = each.value.subscription_period
 }
 
 #--------------------------------------------------------------

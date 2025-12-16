@@ -38,6 +38,7 @@ variable "servers" {
   type = map(object({
     offer                       = string
     os                          = string
+    subscription_period         = optional(string, "hourly")
     hostname                    = optional(string)
     description                 = optional(string, "")
     tags                        = optional(list(string), [])
@@ -67,6 +68,11 @@ variable "servers" {
   validation {
     condition     = alltrue([for k, v in var.servers : can(regex("^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$", k)) || length(k) == 1])
     error_message = "Server keys must be valid identifiers (alphanumeric and hyphens, not starting or ending with hyphen)."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.servers : contains(["hourly", "monthly"], coalesce(v.subscription_period, "hourly"))])
+    error_message = "subscription_period must be either 'hourly' or 'monthly'."
   }
 }
 

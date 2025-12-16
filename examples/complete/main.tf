@@ -14,11 +14,12 @@ module "elastic_metal" {
 
   servers = {
     web-01 = {
-      offer       = "EM-A210R-HDD" # Check available offers with: scw baremetal offer list
-      os          = "Ubuntu"
-      hostname    = "web-01"
-      description = "Web server 01"
-      tags        = ["web", "production"]
+      offer               = "EM-A210R-HDD" # Check available offers with: scw baremetal offer list
+      os                  = "Ubuntu"
+      subscription_period = "hourly" # Options: "hourly" or "monthly"
+      hostname            = "web-01"
+      description         = "Web server 01"
+      tags                = ["web", "production"]
       flexible_ips = [
         {
           description = "Primary failover IP"
@@ -28,11 +29,12 @@ module "elastic_metal" {
     }
 
     web-02 = {
-      offer       = "EM-A210R-HDD"
-      os          = "Ubuntu"
-      hostname    = "web-02"
-      description = "Web server 02"
-      tags        = ["web", "production"]
+      offer               = "EM-A210R-HDD"
+      os                  = "Ubuntu"
+      subscription_period = "hourly"
+      hostname            = "web-02"
+      description         = "Web server 02"
+      tags                = ["web", "production"]
       flexible_ips = [
         {
           description = "Primary failover IP"
@@ -48,6 +50,7 @@ module "elastic_metal" {
     db-01 = {
       offer                       = "EM-B312X-SSD"
       os                          = "Ubuntu"
+      subscription_period         = "hourly" # Monthly billing for long-term database server
       hostname                    = "db-01"
       description                 = "Database server"
       tags                        = ["database", "production"]
