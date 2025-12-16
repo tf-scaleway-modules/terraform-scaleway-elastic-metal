@@ -1,0 +1,75 @@
+variable "servers" {
+  description = "Map of Elastic Metal servers to create"
+  type = map(object({
+    offer                       = string
+    os                          = string
+    hostname                    = optional(string)
+    description                 = optional(string, "")
+    tags                        = optional(list(string), [])
+    ssh_key_ids                 = optional(list(string), [])
+    install_config_afterward    = optional(bool, false)
+    service_user                = optional(string)
+    service_password            = optional(string)
+    user                        = optional(string)
+    password                    = optional(string)
+    reinstall_on_config_changes = optional(bool, false)
+    options = optional(list(object({
+      id         = string
+      expires_at = optional(string)
+    })), [])
+    private_networks = optional(list(object({
+      id = string
+    })), [])
+    flexible_ips = optional(list(object({
+      description = optional(string)
+      tags        = optional(list(string), [])
+      reverse     = optional(string)
+      is_ipv6     = optional(bool, false)
+    })), [])
+  }))
+  default = {}
+
+  validation {
+    condition     = alltrue([for k, v in var.servers : can(regex("^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$", k)) || length(k) == 1])
+    error_message = "Server keys must be valid identifiers (alphanumeric and hyphens, not starting or ending with hyphen)."
+  }
+}
+
+variable "zone" {
+  description = "Zone where Elastic Metal servers will be deployed"
+  type        = string
+  default     = "fr-par-2"
+
+  validation {
+    condition     = can(regex("^[a-z]{2}-[a-z]{3}-[0-9]$", var.zone))
+    error_message = "Zone must be in format: xx-xxx-N (e.g., fr-par-2)."
+  }
+}
+
+variable "project_id" {
+  description = "Scaleway Project ID. If not set, the provider's default project will be used"
+  type        = string
+  default     = null
+}
+
+variable "default_ssh_key_ids" {
+  description = "Default list of SSH key IDs to attach to all servers (merged with per-server ssh_key_ids)"
+  type        = list(string)
+  default     = []
+}
+
+variable "default_tags" {
+  description = "Default tags to apply to all servers (merged with per-server tags)"
+  type        = list(string)
+  default     = []
+}
+
+variable "timeouts" {
+  description = "Timeout configuration for server operations"
+  type = object({
+    create = optional(string, "1h")
+    update = optional(string, "1h")
+    delete = optional(string, "1h")
+  })
+  default = {}
+}
