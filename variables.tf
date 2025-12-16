@@ -38,6 +38,7 @@ variable "servers" {
   type = map(object({
     offer                       = string
     os                          = string
+    os_version                  = optional(string)
     subscription_period         = optional(string, "hourly")
     hostname                    = optional(string)
     description                 = optional(string, "")

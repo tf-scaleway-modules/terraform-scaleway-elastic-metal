@@ -19,9 +19,13 @@ A production-ready Terraform module for creating and managing **Scaleway Elastic
 
 ## Usage
 
-> **Note:** To list available Elastic Metal offers in your zone, run:
+> **Note:** To list available Elastic Metal offers and operating systems in your zone, run:
 > ```bash
+> # List available offers
 > scw baremetal offer list zone=fr-par-2
+>
+> # List available operating systems
+> scw baremetal os list zone=fr-par-2
 > ```
 
 ### Minimal Example
@@ -59,6 +63,7 @@ module "elastic_metal" {
     web-01 = {
       offer       = "EM-A210R-HDD"
       os          = "Ubuntu"
+      os_version  = "22.04 LTS"
       hostname    = "web-01"
       description = "Web server 01"
       tags        = ["web", "production"]
@@ -73,6 +78,7 @@ module "elastic_metal" {
     web-02 = {
       offer       = "EM-A210R-HDD"
       os          = "Ubuntu"
+      os_version  = "22.04 LTS"
       hostname    = "web-02"
       description = "Web server 02"
       tags        = ["web", "production"]
@@ -91,6 +97,7 @@ module "elastic_metal" {
     db-01 = {
       offer                       = "EM-B312X-SSD"
       os                          = "Ubuntu"
+      os_version                  = "24.04 LTS"
       hostname                    = "db-01"
       description                 = "Database server"
       tags                        = ["database", "production"]
@@ -134,6 +141,7 @@ Each server in the `servers` map accepts the following attributes:
 |-----------|-------------|------|---------|:--------:|
 | `offer` | Server offer name (e.g., "EM-A115X-SSD") | `string` | - | yes |
 | `os` | Operating system name (e.g., "Ubuntu") | `string` | - | yes |
+| `os_version` | Operating system version (e.g., "22.04 LTS") | `string` | `null` | no |
 | `hostname` | Server hostname (defaults to map key) | `string` | `null` | no |
 | `description` | Server description | `string` | `""` | no |
 | `tags` | Server-specific tags (merged with default_tags) | `list(string)` | `[]` | no |
@@ -213,7 +221,7 @@ No modules.
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | Default tags to apply to all servers (merged with per-server tags) | `list(string)` | `[]` | no |
 | <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | Scaleway organization ID | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the Scaleway project | `string` | `"default"` | no |
-| <a name="input_servers"></a> [servers](#input\_servers) | Map of Elastic Metal servers to create | <pre>map(object({<br/>    offer                       = string<br/>    os                          = string<br/>    subscription_period         = optional(string, "hourly")<br/>    hostname                    = optional(string)<br/>    description                 = optional(string, "")<br/>    tags                        = optional(list(string), [])<br/>    ssh_key_ids                 = optional(list(string), [])<br/>    install_config_afterward    = optional(bool, false)<br/>    service_user                = optional(string)<br/>    service_password            = optional(string)<br/>    user                        = optional(string)<br/>    password                    = optional(string)<br/>    reinstall_on_config_changes = optional(bool, false)<br/>    options = optional(list(object({<br/>      id         = string<br/>      expires_at = optional(string)<br/>    })), [])<br/>    private_networks = optional(list(object({<br/>      id = string<br/>    })), [])<br/>    flexible_ips = optional(list(object({<br/>      description = optional(string)<br/>      tags        = optional(list(string), [])<br/>      reverse     = optional(string)<br/>      is_ipv6     = optional(bool, false)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_servers"></a> [servers](#input\_servers) | Map of Elastic Metal servers to create | <pre>map(object({<br/>    offer                       = string<br/>    os                          = string<br/>    os_version                  = optional(string)<br/>    subscription_period         = optional(string, "hourly")<br/>    hostname                    = optional(string)<br/>    description                 = optional(string, "")<br/>    tags                        = optional(list(string), [])<br/>    ssh_key_ids                 = optional(list(string), [])<br/>    install_config_afterward    = optional(bool, false)<br/>    service_user                = optional(string)<br/>    service_password            = optional(string)<br/>    user                        = optional(string)<br/>    password                    = optional(string)<br/>    reinstall_on_config_changes = optional(bool, false)<br/>    options = optional(list(object({<br/>      id         = string<br/>      expires_at = optional(string)<br/>    })), [])<br/>    private_networks = optional(list(object({<br/>      id = string<br/>    })), [])<br/>    flexible_ips = optional(list(object({<br/>      description = optional(string)<br/>      tags        = optional(list(string), [])<br/>      reverse     = optional(string)<br/>      is_ipv6     = optional(bool, false)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
 | <a name="input_ssh_keys"></a> [ssh\_keys](#input\_ssh\_keys) | Map of SSH keys to create and attach to all servers | <pre>map(object({<br/>    public_key = string<br/>    disabled   = optional(bool, false)<br/>  }))</pre> | `{}` | no |
 | <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | Timeout configuration for server operations | <pre>object({<br/>    create = optional(string, "1h")<br/>    update = optional(string, "1h")<br/>    delete = optional(string, "1h")<br/>  })</pre> | `{}` | no |
 | <a name="input_zone"></a> [zone](#input\_zone) | Zone where Elastic Metal servers will be deployed | `string` | `"fr-par-2"` | no |

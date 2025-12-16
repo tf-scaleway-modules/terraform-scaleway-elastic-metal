@@ -10,7 +10,7 @@ module "elastic_metal" {
 
   organization_id = "00000000-0000-0000-0000-000000000000"
   project_name    = "default"
-  zone            = "fr-par-2"
+  zone            = "fr-par-1"
 
   servers = {
     web-server = {

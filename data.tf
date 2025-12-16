@@ -7,7 +7,6 @@ data "scaleway_account_project" "this" {
   organization_id = var.organization_id
 }
 
-
 #--------------------------------------------------------------
 # Baremetal Offer Lookup
 # Resolves offer names to offer IDs for each server
@@ -29,6 +28,7 @@ data "scaleway_baremetal_offer" "this" {
 data "scaleway_baremetal_os" "this" {
   for_each = local.servers
 
-  zone = var.zone
-  name = each.value.os
+  zone    = var.zone
+  name    = each.value.os
+  version = each.value.os_version
 }
