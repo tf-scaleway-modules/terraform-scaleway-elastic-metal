@@ -10,6 +10,7 @@ A production-ready Terraform module for creating and managing **Scaleway Elastic
 ## Features
 
 - **Multiple Servers** - Deploy and manage multiple Elastic Metal servers with a single module call
+- **Server Count** - Use `count` parameter to create multiple identical servers (e.g., `web` with `count=3` creates `web-01`, `web-02`, `web-03`)
 - **Flexible IPs** - Attach multiple IPv4/IPv6 flexible IPs per server for failover scenarios
 - **SSH Key Management** - Create new SSH keys or reference existing ones
 - **Private Networks** - Connect servers to Scaleway VPC private networks
@@ -60,46 +61,39 @@ module "elastic_metal" {
   zone            = "fr-par-2"
 
   servers = {
-    web-01 = {
-      offer       = "EM-A210R-HDD"
-      os          = "Ubuntu"
-      os_version  = "22.04 LTS (Jammy Jellyfish)"
-      hostname    = "web-01"
-      description = "Web server 01"
-      tags        = ["web", "production"]
+    # Using count to create multiple identical servers
+    # This creates: web-01, web-02, web-03
+    web = {
+      count               = 3  # Creates web-01, web-02, web-03
+      offer               = "EM-A210R-HDD"
+      os                  = "Ubuntu"
+      os_version          = "22.04 LTS (Jammy Jellyfish)"
+      description         = "Web server"  # Becomes "Web server 01", etc.
+      tags                = ["web", "production"]
       flexible_ips = [
         {
           description = "Primary failover IP"
-          reverse     = "web-01.example.com"
         }
       ]
     }
 
-    web-02 = {
+    # Single server (count = 1 is default)
+    api = {
       offer       = "EM-A210R-HDD"
       os          = "Ubuntu"
       os_version  = "22.04 LTS (Jammy Jellyfish)"
-      hostname    = "web-02"
-      description = "Web server 02"
-      tags        = ["web", "production"]
-      flexible_ips = [
-        {
-          description = "Primary failover IP"
-          reverse     = "web-02.example.com"
-        },
-        {
-          description = "IPv6 address"
-          is_ipv6     = true
-        }
-      ]
+      hostname    = "api-gateway"  # Custom hostname
+      description = "API Gateway server"
+      tags        = ["api", "production"]
     }
 
-    db-01 = {
+    # Database cluster with count
+    db = {
+      count                       = 2  # Creates db-01, db-02
       offer                       = "EM-B312X-SSD"
       os                          = "Ubuntu"
       os_version                  = "24.04 LTS (Noble Numbat)"
       subscription_period         = "monthly"
-      hostname                    = "db-01"
       description                 = "Database server"
       tags                        = ["database", "production"]
       reinstall_on_config_changes = false
@@ -153,11 +147,12 @@ Each server in the `servers` map accepts the following attributes:
 
 | Attribute | Description | Type | Default | Required |
 |-----------|-------------|------|---------|:--------:|
+| `count` | Number of identical servers to create (creates name-01, name-02, etc.) | `number` | `1` | no |
 | `offer` | Server offer name (e.g., "EM-A115X-SSD") | `string` | - | yes |
 | `os` | Operating system name (e.g., "Ubuntu") | `string` | - | yes |
 | `os_version` | Operating system version (e.g., "24.04 LTS (Noble Numbat)") | `string` | `null` | no |
 | `subscription_period` | Billing period: "hourly" or "monthly" | `string` | `"hourly"` | no |
-| `hostname` | Server hostname (defaults to map key) | `string` | `null` | no |
+| `hostname` | Server hostname (defaults to map key, indexed if count > 1) | `string` | `null` | no |
 | `description` | Server description | `string` | `""` | no |
 | `tags` | Server-specific tags (merged with default_tags) | `list(string)` | `[]` | no |
 | `ssh_key_ids` | Additional SSH key IDs for this server | `list(string)` | `[]` | no |

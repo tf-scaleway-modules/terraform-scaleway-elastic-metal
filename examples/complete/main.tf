@@ -13,49 +13,42 @@ module "elastic_metal" {
   zone            = "fr-par-2"
 
   servers = {
-    web-01 = {
-      offer               = "EM-A116X-SSD"             # Check available offers with: scw baremetal offer list
-      os                  = "Ubuntu"                   # Check available OS with: scw baremetal os list zone=fr-par-1
+    # Using count to create multiple identical servers
+    # This creates: web-01, web-02, web-03
+    web = {
+      count               = 3                          # Creates web-01, web-02, web-03
+      offer               = "EM-A610R-NVME"            # Check available offers with: scw baremetal offer list
+      os                  = "Ubuntu"                   # Check available OS with: scw baremetal os list zone=fr-par-2
       os_version          = "24.04 LTS (Noble Numbat)" # Optional: use 'scw baremetal os list' to see versions
       subscription_period = "hourly"                   # Options: "hourly" or "monthly"
-      hostname            = "web-01"
-      description         = "Web server 01"
+      description         = "Web server"               # Becomes "Web server 01", "Web server 02", etc.
       tags                = ["web", "production"]
       flexible_ips = [
         {
           description = "Primary failover IP"
-          reverse     = "web-01.example.com."
         }
       ]
     }
 
-    web-02 = {
-      offer               = "EM-A610R-NVME"
-      os                  = "Ubuntu"
-      os_version          = "24.04 LTS (Noble Numbat)" # Use 'scw baremetal os list' to see versions
-      subscription_period = "hourly"
-      hostname            = "web-02"
-      description         = "Web server 02"
-      tags                = ["web", "production"]
-      flexible_ips = [
-        {
-          description = "Primary failover IP"
-          reverse     = "web-02.example.com."
-        },
-        {
-          description = "IPv6 address"
-          is_ipv6     = true
-        }
-      ]
-    }
+    # Single server without count (or count = 1)
+    # api = {
+    #   offer               = "EM-A610R-NVME"
+    #   os                  = "Ubuntu"
+    #   os_version          = "24.04 LTS (Noble Numbat)"
+    #   subscription_period = "hourly"
+    #   hostname            = "api-server"              # Custom hostname (not indexed)
+    #   description         = "API Gateway server"
+    #   tags                = ["api", "production"]
+    # }
 
-    # db-01 = {
+    # Database cluster with count
+    # db = {
+    #   count                       = 2                          # Creates db-01, db-02
     #   offer                       = "EM-B312X-SSD"
     #   os                          = "Ubuntu"
-    #   os_version                  = "24.04 LTS (Noble Numbat)" # Use 'scw baremetal os list' to see versions
+    #   os_version                  = "24.04 LTS (Noble Numbat)"
     #   subscription_period         = "monthly"                  # Monthly billing for long-term servers
-    #   hostname                    = "db-01"
-    #   description                 = "Database server"
+    #   description                 = "Database server"          # Becomes "Database server 01", etc.
     #   tags                        = ["database", "production"]
     #   reinstall_on_config_changes = false
     #
