@@ -40,3 +40,9 @@ scw baremetal offer list zone=fr-par-1
 run = '''
 scw baremetal offer list zone=fr-par-2
 '''
+
+[tasks.changelog]
+description = "Update CHANGELOG.md (fetches all tags first)"
+run = '''
+git-cliff --config .cliff.toml --output CHANGELOG.md
+'''
