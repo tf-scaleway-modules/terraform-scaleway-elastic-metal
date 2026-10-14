@@ -161,6 +161,8 @@ Each server in the `servers` map accepts the following attributes:
 | `service_password` | Service password for installation | `string` | `null` | no |
 | `user` | Custom user for OS installation | `string` | `null` | no |
 | `password` | Custom password for OS installation | `string` | `null` | no |
+| `password_wo` / `service_password_wo` | Write-only alternatives to `password` / `service_password`, never stored in state (OpenTofu/Terraform >= 1.11) | `string` | `null` | no |
+| `password_wo_version` / `service_password_wo_version` | Bump to apply a new write-only password | `number` | `null` | no |
 | `reinstall_on_config_changes` | Reinstall server when configuration changes | `bool` | `false` | no |
 | `options` | List of server options | `list(object)` | `[]` | no |
 | `private_networks` | List of private networks to attach | `list(object)` | `[]` | no |
@@ -220,14 +222,14 @@ Each SSH key in the `ssh_keys` map accepts:
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.10.7 |
-| <a name="requirement_scaleway"></a> [scaleway](#requirement\_scaleway) | ~> 2.64 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.11.0 |
+| <a name="requirement_scaleway"></a> [scaleway](#requirement\_scaleway) | ~> 2.86 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_scaleway"></a> [scaleway](#provider\_scaleway) | ~> 2.64 |
+| <a name="provider_scaleway"></a> [scaleway](#provider\_scaleway) | ~> 2.86 |
 
 ## Modules
 
@@ -252,7 +254,7 @@ No modules.
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | Default tags to apply to all servers (merged with per-server tags) | `list(string)` | `[]` | no |
 | <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | Scaleway organization ID | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the Scaleway project | `string` | `"default"` | no |
-| <a name="input_servers"></a> [servers](#input\_servers) | Map of Elastic Metal servers to create. Use 'count' to create multiple identical servers with indexed names. | <pre>map(object({<br/>    count                       = optional(number, 1)<br/>    offer                       = string<br/>    os                          = string<br/>    os_version                  = optional(string)<br/>    subscription_period         = optional(string, "hourly")<br/>    hostname                    = optional(string)<br/>    description                 = optional(string, "")<br/>    tags                        = optional(list(string), [])<br/>    ssh_key_ids                 = optional(list(string), [])<br/>    install_config_afterward    = optional(bool, false)<br/>    service_user                = optional(string)<br/>    service_password            = optional(string)<br/>    user                        = optional(string)<br/>    password                    = optional(string)<br/>    reinstall_on_config_changes = optional(bool, false)<br/>    options = optional(list(object({<br/>      id         = string<br/>      expires_at = optional(string)<br/>    })), [])<br/>    private_networks = optional(list(object({<br/>      id = string<br/>    })), [])<br/>    flexible_ips = optional(list(object({<br/>      description = optional(string)<br/>      tags        = optional(list(string), [])<br/>      reverse     = optional(string)<br/>      is_ipv6     = optional(bool, false)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_servers"></a> [servers](#input\_servers) | Map of Elastic Metal servers to create. Use 'count' to create multiple identical servers with indexed names. | <pre>map(object({<br/>    count                       = optional(number, 1)<br/>    offer                       = string<br/>    os                          = string<br/>    os_version                  = optional(string)<br/>    subscription_period         = optional(string, "hourly")<br/>    hostname                    = optional(string)<br/>    description                 = optional(string, "")<br/>    tags                        = optional(list(string), [])<br/>    ssh_key_ids                 = optional(list(string), [])<br/>    install_config_afterward    = optional(bool, false)<br/>    service_user                = optional(string)<br/>    service_password            = optional(string)<br/>    service_password_wo         = optional(string) # write-only, never stored in state<br/>    service_password_wo_version = optional(number) # bump to apply a new service_password_wo<br/>    user                        = optional(string)<br/>    password                    = optional(string)<br/>    password_wo                 = optional(string) # write-only, never stored in state<br/>    password_wo_version         = optional(number) # bump to apply a new password_wo<br/>    reinstall_on_config_changes = optional(bool, false)<br/>    options = optional(list(object({<br/>      id         = string<br/>      expires_at = optional(string)<br/>    })), [])<br/>    private_networks = optional(list(object({<br/>      id = string<br/>    })), [])<br/>    flexible_ips = optional(list(object({<br/>      description = optional(string)<br/>      tags        = optional(list(string), [])<br/>      reverse     = optional(string)<br/>      is_ipv6     = optional(bool, false)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
 | <a name="input_ssh_keys"></a> [ssh\_keys](#input\_ssh\_keys) | Map of SSH keys to create and attach to all servers | <pre>map(object({<br/>    public_key = string<br/>    disabled   = optional(bool, false)<br/>  }))</pre> | `{}` | no |
 | <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | Timeout configuration for server operations | <pre>object({<br/>    create = optional(string, "1h")<br/>    update = optional(string, "1h")<br/>    delete = optional(string, "1h")<br/>  })</pre> | `{}` | no |
 | <a name="input_zone"></a> [zone](#input\_zone) | Zone where Elastic Metal servers will be deployed | `string` | `"fr-par-2"` | no |
@@ -288,10 +290,10 @@ This module is provided "as is" without warranty of any kind, express or implied
 [apache]: https://opensource.org/licenses/Apache-2.0
 [apache-shield]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
 
-[terraform-badge]: https://img.shields.io/badge/Terraform-%3E%3D1.10-623CE4
+[terraform-badge]: https://img.shields.io/badge/Terraform-%3E%3D1.11-623CE4
 [terraform-url]: https://www.terraform.io
 
-[scaleway-badge]: https://img.shields.io/badge/Scaleway%20Provider-%3E%3D2.63-4f0599
+[scaleway-badge]: https://img.shields.io/badge/Scaleway%20Provider-%3E%3D2.86-4f0599
 [scaleway-url]: https://registry.terraform.io/providers/scaleway/scaleway/
 
 [release-badge]: https://img.shields.io/gitlab/v/release/leminnov/terraform/modules/scaleway-elastic-metal?include_prereleases&sort=semver
