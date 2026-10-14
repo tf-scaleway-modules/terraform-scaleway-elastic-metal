@@ -23,8 +23,12 @@ locals {
         install_config_afterward    = coalesce(config.install_config_afterward, false)
         service_user                = config.service_user
         service_password            = config.service_password
+        service_password_wo         = config.service_password_wo
+        service_password_wo_version = config.service_password_wo_version
         user                        = config.user
         password                    = config.password
+        password_wo                 = config.password_wo
+        password_wo_version         = config.password_wo_version
         reinstall_on_config_changes = coalesce(config.reinstall_on_config_changes, false)
         options                     = coalesce(config.options, [])
         private_networks            = coalesce(config.private_networks, [])

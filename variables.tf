@@ -48,8 +48,12 @@ variable "servers" {
     install_config_afterward    = optional(bool, false)
     service_user                = optional(string)
     service_password            = optional(string)
+    service_password_wo         = optional(string) # write-only, never stored in state
+    service_password_wo_version = optional(number) # bump to apply a new service_password_wo
     user                        = optional(string)
     password                    = optional(string)
+    password_wo                 = optional(string) # write-only, never stored in state
+    password_wo_version         = optional(number) # bump to apply a new password_wo
     reinstall_on_config_changes = optional(bool, false)
     options = optional(list(object({
       id         = string

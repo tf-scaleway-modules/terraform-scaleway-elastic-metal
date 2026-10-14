@@ -3,12 +3,12 @@
 ################################################################################
 
 terraform {
-  required_version = ">= 1.10.7"
+  required_version = ">= 1.11.0"
 
   required_providers {
     scaleway = {
       source  = "scaleway/scaleway"
-      version = "~> 2.64"
+      version = "~> 2.86"
     }
   }
 }

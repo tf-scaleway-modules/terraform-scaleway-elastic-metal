@@ -39,10 +39,14 @@ resource "scaleway_baremetal_server" "this" {
   install_config_afterward = each.value.install_config_afterward
 
   # Installation credentials
-  service_user     = each.value.service_user
-  service_password = each.value.service_password
-  user             = each.value.user
-  password         = each.value.password
+  service_user                = each.value.service_user
+  service_password            = each.value.service_password
+  service_password_wo         = each.value.service_password_wo
+  service_password_wo_version = each.value.service_password_wo_version
+  user                        = each.value.user
+  password                    = each.value.password
+  password_wo                 = each.value.password_wo
+  password_wo_version         = each.value.password_wo_version
 
   # Lifecycle configuration
   reinstall_on_config_changes = each.value.reinstall_on_config_changes
