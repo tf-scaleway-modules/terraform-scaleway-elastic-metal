@@ -30,6 +30,9 @@ locals {
         password_wo                 = config.password_wo
         password_wo_version         = config.password_wo_version
         reinstall_on_config_changes = coalesce(config.reinstall_on_config_changes, false)
+        protected                   = config.protected
+        cloud_init                  = config.cloud_init
+        partitioning                = config.partitioning
         options                     = coalesce(config.options, [])
         private_networks            = coalesce(config.private_networks, [])
         flexible_ips                = coalesce(config.flexible_ips, [])

@@ -41,6 +41,24 @@ module "elastic_metal" {
     #   hostname            = "api-server"              # Custom hostname (not indexed)
     #   description         = "API Gateway server"
     #   tags                = ["api", "production"]
+    #   protected           = true # the API refuses deletion until set back to false
+    #
+    #   # Cloud-init user data: no secrets, it is stored in state in clear text
+    #   cloud_init = <<-EOT
+    #     #cloud-config
+    #     package_update: true
+    #     packages:
+    #       - nginx
+    #   EOT
+    #   # or: cloud_init = file("${path.module}/cloud-init.yaml")
+    #
+    #   # Custom partitioning schema, applied on install or reinstall only
+    #   partitioning = jsonencode({
+    #     disks       = []
+    #     raids       = []
+    #     zfs         = { pools = [] }
+    #     filesystems = []
+    #   })
     # }
 
     # Database cluster with count
@@ -59,6 +77,8 @@ module "elastic_metal" {
     #   private_networks = [
     #     {
     #       id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    #       # Optional: pin the private IPs (UUID or <zone>/<uuid>)
+    #       # ipam_ip_ids = ["fr-par-2/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
     #     }
     #   ]
     #

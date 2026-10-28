@@ -6,6 +6,7 @@
 |-------|-------|:--------:|------------|
 | Installation password | `servers.<key>.password` | yes, clear text | Use `password_wo` with `password_wo_version`; the module warns (`plain_installation_passwords` check) when the plain form is set |
 | Service password | `servers.<key>.service_password` | yes, clear text | Use `service_password_wo` with `service_password_wo_version`; same warning |
+| Cloud-init user data | `servers.<key>.cloud_init` | yes, clear text | The provider has no write-only form; do not embed secrets, fetch them at boot (vault, instance metadata) |
 | Write-only passwords | `password_wo`, `service_password_wo` | no | Sent through the provider's write-only arguments; change `*_wo_version` to apply a new value |
 | SSH public keys | `ssh_keys.<key>.public_key` | yes | Public material, not a secret |
 

@@ -18,6 +18,11 @@ output "server_ipv6s" {
   value       = module.elastic_metal.server_ipv6s
 }
 
+output "server_private_ip_addresses" {
+  description = "Private IP addresses per server"
+  value       = module.elastic_metal.server_private_ip_addresses
+}
+
 output "flexible_ip_addresses" {
   description = "Flexible IP addresses per server"
   value       = module.elastic_metal.flexible_ip_addresses
