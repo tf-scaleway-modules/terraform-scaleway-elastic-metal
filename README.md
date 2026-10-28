@@ -277,6 +277,16 @@ No modules.
 | <a name="output_ssh_keys"></a> [ssh\_keys](#output\_ssh\_keys) | Map of all created SSH key resources |
 <!-- END_TF_DOCS -->
 
+## Contributing
+
+Changes are planned with [OpenSpec](https://github.com/Fission-AI/OpenSpec): `openspec/specs/` is the module's current contract and [AGENTS.md](AGENTS.md) routes to the engineering standards. Behaviour changes, new inputs, outputs or resources go through a change proposal (`/openspec-propose`) before any code.
+
+1. Open an issue describing the change.
+2. Run `mise install` and `mise run spec-setup` once per machine (registers the standards stores), then create a branch from `develop`.
+3. For a behaviour change, run `/openspec-propose`, implement with `/openspec-apply-change`, then `/openspec-archive-change` merges the deltas into the main specs.
+4. Run `pre-commit run -a` and `mise run spec-validate`. Unit tests (`tofu test`) do not exist yet; new behaviour adds `tests/main.tftest.hcl`.
+5. Write commit subjects that read as `CHANGELOG.md` lines: git-cliff generates the file (`mise run changelog`).
+
 ## License
 
 Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for full details.
