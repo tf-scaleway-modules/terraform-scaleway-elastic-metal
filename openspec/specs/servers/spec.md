@@ -6,7 +6,7 @@ Elastic Metal servers: offer and OS lookup, count expansion, naming, credentials
 ## Requirements
 
 ### Requirement: Server definitions
-The module SHALL create one `scaleway_baremetal_server` per expanded entry of `servers`, in the module's zone and project. Each entry has the required attributes `offer` and `os` (strings); every other attribute is optional (defaults: `count` 1, `subscription_period` `"hourly"`, `description` `""`, `install_config_afterward` and `reinstall_on_config_changes` `false`, lists `[]`). `servers` defaults to `{}`.
+The module SHALL create one `scaleway_baremetal_server` per expanded entry of `servers`, in the module's zone and project. Each entry has the required attributes `offer` and `os` (strings); every other attribute is optional (defaults: `count` 1, `subscription_period` `"hourly"`, `description` `""`, `install_config_afterward` and `reinstall_on_config_changes` `false`, lists `[]`). `servers` defaults to `{}`. A server that sets no `description` SHALL plan with an empty description.
 
 #### Scenario: Minimal server
 - **WHEN** `servers = { api = { offer = "EM-A610R-NVME", os = "Ubuntu" } }` and an SSH key source exists
@@ -24,7 +24,7 @@ For each key of `servers` the module SHALL resolve the offer by `offer` name and
 - **THEN** the offer is looked up with the monthly subscription period
 
 ### Requirement: Server key validation
-Every key of `servers` MUST be a single alphanumeric character or start and end with an alphanumeric character and contain only alphanumerics and hyphens.
+Every key of `servers` MUST consist of alphanumerics and hyphens only and start and end with an alphanumeric character; a single character key MUST be alphanumeric.
 
 #### Scenario: Key ends with a hyphen
 - **WHEN** `servers = { "web-" = {...} }`
@@ -33,6 +33,14 @@ Every key of `servers` MUST be a single alphanumeric character or start and end 
 #### Scenario: Key contains an underscore
 - **WHEN** `servers = { "web_1" = {...} }`
 - **THEN** the plan fails with the same error
+
+#### Scenario: Single character key that is not alphanumeric
+- **WHEN** `servers = { "-" = {...} }` or `servers = { "_" = {...} }`
+- **THEN** the plan fails with the same error
+
+#### Scenario: Single alphanumeric character key
+- **WHEN** `servers = { "a" = {...} }`
+- **THEN** the key is accepted
 
 ### Requirement: Subscription period validation
 `subscription_period` MUST be `"hourly"` or `"monthly"`.
@@ -114,3 +122,18 @@ Every server SHALL use `timeouts.create`, `timeouts.update` and `timeouts.delete
 #### Scenario: Custom create timeout
 - **WHEN** `timeouts = { create = "2h" }`
 - **THEN** servers use create `2h` and update and delete `1h`
+
+### Requirement: Plain installation passwords are reported
+A `check` block SHALL warn at plan time, naming the server keys and never the values, when any server sets the plain `password` or `service_password`, advising the `password_wo` / `service_password_wo` forms. The check MUST NOT block the plan. `SECURITY.md` SHALL list what lands in state.
+
+#### Scenario: Plain password used
+- **WHEN** server `api` sets `password = "..."`
+- **THEN** the plan succeeds with a warning naming `api` and recommending `password_wo`
+
+#### Scenario: Plain service password used
+- **WHEN** server `api` sets `service_password = "..."`
+- **THEN** the plan succeeds with the same warning
+
+#### Scenario: Only write-only passwords
+- **WHEN** servers set only `password_wo` and `service_password_wo`
+- **THEN** no warning is emitted

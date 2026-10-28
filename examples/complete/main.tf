@@ -32,6 +32,8 @@ module "elastic_metal" {
 
     # Single server without count (or count = 1)
     # api = {
+    #   password_wo         = var.api_password # write-only, never stored in state
+    #   password_wo_version = 1                # bump to apply a new password
     #   offer               = "EM-A610R-NVME"
     #   os                  = "Ubuntu"
     #   os_version          = "24.04 LTS (Noble Numbat)"

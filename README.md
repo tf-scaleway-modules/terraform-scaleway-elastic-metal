@@ -158,9 +158,9 @@ Each server in the `servers` map accepts the following attributes:
 | `ssh_key_ids` | Additional SSH key IDs for this server | `list(string)` | `[]` | no |
 | `install_config_afterward` | Install configuration after server creation | `bool` | `false` | no |
 | `service_user` | Service user for installation | `string` | `null` | no |
-| `service_password` | Service password for installation | `string` | `null` | no |
+| `service_password` | Service password for installation (stored in state, prefer `service_password_wo`; see [SECURITY.md](SECURITY.md)) | `string` | `null` | no |
 | `user` | Custom user for OS installation | `string` | `null` | no |
-| `password` | Custom password for OS installation | `string` | `null` | no |
+| `password` | Custom password for OS installation (stored in state, prefer `password_wo`; see [SECURITY.md](SECURITY.md)) | `string` | `null` | no |
 | `password_wo` / `service_password_wo` | Write-only alternatives to `password` / `service_password`, never stored in state (OpenTofu/Terraform >= 1.11) | `string` | `null` | no |
 | `password_wo_version` / `service_password_wo_version` | Bump to apply a new write-only password | `number` | `null` | no |
 | `reinstall_on_config_changes` | Reinstall server when configuration changes | `bool` | `false` | no |
@@ -217,6 +217,8 @@ Each SSH key in the `ssh_keys` map accepts:
 | `update` | Timeout for server updates | `"1h"` |
 | `delete` | Timeout for server deletion | `"1h"` |
 
+Each value is a duration such as `30m`, `1h` or `1h30m`.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -271,7 +273,7 @@ No modules.
 | <a name="output_server_ids"></a> [server\_ids](#output\_server\_ids) | Map of server names to their IDs |
 | <a name="output_server_ips"></a> [server\_ips](#output\_server\_ips) | Map of server names to their public IPv4 addresses |
 | <a name="output_server_ipv6s"></a> [server\_ipv6s](#output\_server\_ipv6s) | Map of server names to their public IPv6 addresses |
-| <a name="output_server_private_ips"></a> [server\_private\_ips](#output\_server\_private\_ips) | Map of server names to their private network IPs |
+| <a name="output_server_private_ips"></a> [server\_private\_ips](#output\_server\_private\_ips) | Map of server names to the VLAN ID of each of their private network attachments |
 | <a name="output_servers"></a> [servers](#output\_servers) | Map of all Elastic Metal server resources |
 | <a name="output_ssh_key_ids"></a> [ssh\_key\_ids](#output\_ssh\_key\_ids) | Map of SSH key names to their IDs |
 | <a name="output_ssh_keys"></a> [ssh\_keys](#output\_ssh\_keys) | Map of all created SSH key resources |
@@ -284,7 +286,7 @@ Changes are planned with [OpenSpec](https://github.com/Fission-AI/OpenSpec): `op
 1. Open an issue describing the change.
 2. Run `mise install` and `mise run spec-setup` once per machine (registers the standards stores), then create a branch from `develop`.
 3. For a behaviour change, run `/openspec-propose`, implement with `/openspec-apply-change`, then `/openspec-archive-change` merges the deltas into the main specs.
-4. Run `pre-commit run -a` and `mise run spec-validate`. Unit tests (`tofu test`) do not exist yet; new behaviour adds `tests/main.tftest.hcl`.
+4. Run `pre-commit run -a` and `mise run spec-validate`. Unit tests run with `tofu test`; new behaviour extends `tests/main.tftest.hcl`.
 5. Write commit subjects that read as `CHANGELOG.md` lines: git-cliff generates the file (`mise run changelog`).
 
 ## License

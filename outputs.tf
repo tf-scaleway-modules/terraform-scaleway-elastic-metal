@@ -41,7 +41,7 @@ output "server_ipv6s" {
 }
 
 output "server_private_ips" {
-  description = "Map of server names to their private network IPs"
+  description = "Map of server names to the VLAN ID of each of their private network attachments"
   value = {
     for name, server in scaleway_baremetal_server.this : name => [
       for pn in server.private_network : pn.vlan_id
@@ -77,7 +77,7 @@ output "flexible_ip_addresses" {
   value = {
     for name, server in scaleway_baremetal_server.this : name => [
       for key, fip in scaleway_flexible_ip.this : fip.ip_address
-      if startswith(key, "${name}-fip-")
+      if local.flexible_ips[key].server_name == name
     ]
   }
 }
