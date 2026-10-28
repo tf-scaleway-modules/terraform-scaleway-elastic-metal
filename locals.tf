@@ -17,7 +17,7 @@ locals {
         os_version                  = config.os_version
         subscription_period         = coalesce(config.subscription_period, "hourly")
         hostname_base               = config.hostname
-        description_base            = coalesce(config.description, "")
+        description_base            = config.description
         tags                        = coalesce(config.tags, [])
         ssh_key_ids                 = coalesce(config.ssh_key_ids, [])
         install_config_afterward    = coalesce(config.install_config_afterward, false)
