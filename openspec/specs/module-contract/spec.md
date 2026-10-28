@@ -45,6 +45,13 @@ The module SHALL expose the optional inputs `servers` (map of objects, default `
 - **WHEN** `timeouts` is not set
 - **THEN** create, update and delete timeouts of every server are `1h`
 
+### Requirement: Timeouts are durations
+Each `timeouts` value MUST be a duration made of numbers with a unit of `ns`, `us`, `µs`, `ms`, `s`, `m` or `h` (for example `30m`, `1h30m`), or `0`.
+
+#### Scenario: Malformed timeout
+- **WHEN** `timeouts = { create = "2 hours" }` or `timeouts = { delete = "30" }`
+- **THEN** the plan fails with "Timeouts must be durations such as 30m, 1h or 1h30m."
+
 ### Requirement: Default SSH key IDs are validated
 Every entry of `default_ssh_key_ids` MUST be a lowercase UUID.
 

@@ -72,7 +72,7 @@ variable "servers" {
   default = {}
 
   validation {
-    condition     = alltrue([for k, v in var.servers : can(regex("^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$", k)) || length(k) == 1])
+    condition     = alltrue([for k, v in var.servers : can(regex("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])$", k))])
     error_message = "Server keys must be valid identifiers (alphanumeric and hyphens, not starting or ending with hyphen)."
   }
 
@@ -134,4 +134,9 @@ variable "timeouts" {
     delete = optional(string, "1h")
   })
   default = {}
+
+  validation {
+    condition     = alltrue([for t in values(var.timeouts) : can(regex("^(0|([0-9]+(\\.[0-9]+)?(ns|us|µs|ms|s|m|h))+)$", t))])
+    error_message = "Timeouts must be durations such as 30m, 1h or 1h30m."
+  }
 }

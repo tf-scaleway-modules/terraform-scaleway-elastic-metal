@@ -67,7 +67,7 @@ in your summary.
 
 ## Commands
 - Format / validate: `tofu fmt -recursive`, `tofu init -backend=false && tofu validate`, `tflint --recursive`
-- Tests: `tofu test` (unit, no Scaleway account; `tests/` does not exist yet, new behaviour adds `tests/main.tftest.hcl`)
+- Tests: `tofu test` (unit, no Scaleway account; new behaviour extends `tests/main.tftest.hcl`)
 - Everything incl. README regeneration: `pre-commit run -a`
 - Changelog: `mise run changelog` (git-cliff, at release)
 - Specs: `mise run spec-validate`; standards stores: `mise run spec-setup`
