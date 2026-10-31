@@ -55,12 +55,16 @@ variable "servers" {
     password_wo                 = optional(string) # write-only, never stored in state
     password_wo_version         = optional(number) # bump to apply a new password_wo
     reinstall_on_config_changes = optional(bool, false)
+    protected                   = optional(bool, false) # true makes the API refuse deletion, so destroy fails until it is set back to false
+    cloud_init                  = optional(string)      # user data, stored in state in clear text: do not embed secrets; applied at boot, needs a reboot to change
+    partitioning                = optional(string)      # JSON schema, applied on install or reinstall only
     options = optional(list(object({
       id         = string
       expires_at = optional(string)
     })), [])
     private_networks = optional(list(object({
-      id = string
+      id          = string
+      ipam_ip_ids = optional(list(string)) # pins the private IPs; IPs already assigned stay if removed later
     })), [])
     flexible_ips = optional(list(object({
       description = optional(string)
@@ -84,6 +88,27 @@ variable "servers" {
   validation {
     condition     = alltrue([for k, v in var.servers : coalesce(v.count, 1) >= 1 && coalesce(v.count, 1) <= 100])
     error_message = "Server count must be between 1 and 100."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.servers : v.cloud_init == null || length(v.cloud_init) <= 127998])
+    error_message = "cloud_init must not exceed 127998 characters."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.servers : v.partitioning == null || can(jsondecode(v.partitioning))])
+    error_message = "partitioning must be a valid JSON document."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.servers : alltrue([
+        for pn in coalesce(v.private_networks, []) : pn.ipam_ip_ids == null || alltrue([
+          for id in pn.ipam_ip_ids : can(regex("^([a-z]{2}-[a-z]{3}(-[0-9])?/)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", id))
+        ])
+      ])
+    ])
+    error_message = "ipam_ip_ids entries must be UUIDs, optionally prefixed by a zone or region (e.g. fr-par-2/<uuid>)."
   }
 }
 
