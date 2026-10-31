@@ -1,25 +1,15 @@
-# Runs that plan a server cannot use the mock provider: the offer_id and os_id
-# attributes of the baremetal data sources are not computed in the provider schema,
-# so a mock cannot supply them and main.tf cannot split the OS ID. The
-# plain_installation_passwords check and flexible_ip_addresses are therefore
-# not covered by this unit suite. override_data cannot fill the gap: it refuses
-# non-computed fields (offer_id, os_id) and does not accept per-instance targets.
-# The accepted values of protected, cloud_init, partitioning and ipam_ip_ids and
-# the server_private_ips / server_private_ip_addresses outputs were checked on a
-# throwaway copy with the two lookups replaced by literals; only the validations
-# are tested here.
+# Runs that plan a server cannot use the mock provider: the offer_id, os_id and
+# option_id attributes of the baremetal data sources are not computed in the provider
+# schema, so a mock cannot supply them and main.tf cannot split the OS ID.
+# override_data cannot fill the gap: it refuses non-computed fields and does not accept
+# per-instance targets. The accepted values (options by name, write-only passwords,
+# tags merge, flexible IP reverse, project_id, private network outputs) were checked on
+# a throwaway copy with the lookups replaced by literals; only the validations and the
+# empty configuration are tested here.
 
-mock_provider "scaleway" {
-  override_data {
-    target = data.scaleway_account_project.this
-    values = {
-      id = "11111111-1111-1111-1111-111111111111"
-    }
-  }
-}
+mock_provider "scaleway" {}
 
 variables {
-  organization_id = "00000000-0000-0000-0000-000000000000"
   ssh_keys = {
     admin = { public_key = "ssh-ed25519 AAAA test@example.com" }
   }
@@ -36,6 +26,71 @@ run "happy_path" {
     condition     = length(scaleway_baremetal_server.this) == 0 && length(scaleway_iam_ssh_key.this) == 1
     error_message = "Expected one SSH key and no server"
   }
+
+  assert {
+    condition     = length(data.scaleway_baremetal_option.this) == 0
+    error_message = "Expected no option lookup"
+  }
+}
+
+run "explicit_project_and_zone_accepted" {
+  command = plan
+
+  variables {
+    project_id = "11111111-1111-1111-1111-111111111111"
+    zone       = "fr-par-2"
+  }
+
+  assert {
+    condition     = scaleway_iam_ssh_key.this["admin"].project_id == "11111111-1111-1111-1111-111111111111"
+    error_message = "Expected the SSH key in the given project"
+  }
+}
+
+run "project_id_not_uuid_rejected" {
+  command = plan
+
+  variables {
+    project_id = "default"
+  }
+
+  expect_failures = [var.project_id]
+}
+
+run "zone_malformed_rejected" {
+  command = plan
+
+  variables {
+    zone = "paris"
+  }
+
+  expect_failures = [var.zone]
+}
+
+run "ssh_key_ids_not_uuid_rejected" {
+  command = plan
+
+  variables {
+    ssh_key_ids = ["abc"]
+  }
+
+  expect_failures = [var.ssh_key_ids]
+}
+
+run "reverse_not_hostname_rejected" {
+  command = plan
+
+  variables {
+    servers = {
+      web = {
+        offer        = "EM-A610R-NVME"
+        os           = "Ubuntu"
+        flexible_ips = [{ reverse = "not a host" }]
+      }
+    }
+  }
+
+  expect_failures = [var.servers]
 }
 
 run "server_key_single_dash_rejected" {

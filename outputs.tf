@@ -1,13 +1,4 @@
 #--------------------------------------------------------------
-# Project Output
-#--------------------------------------------------------------
-
-output "project_id" {
-  description = "The Scaleway project ID"
-  value       = data.scaleway_account_project.this.id
-}
-
-#--------------------------------------------------------------
 # Server Outputs
 #--------------------------------------------------------------
 
@@ -40,7 +31,7 @@ output "server_ipv6s" {
   }
 }
 
-output "server_private_ips" {
+output "server_vlan_ids" {
   description = "Map of server names to the VLAN ID of each of their private network attachments"
   value = {
     for name, server in scaleway_baremetal_server.this : name => [
@@ -49,7 +40,7 @@ output "server_private_ips" {
   }
 }
 
-output "server_private_ip_addresses" {
+output "server_private_ips" {
   description = "Map of server names to their private IP addresses"
   value = {
     for name, server in scaleway_baremetal_server.this : name => [

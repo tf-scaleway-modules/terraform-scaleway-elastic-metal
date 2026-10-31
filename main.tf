@@ -8,7 +8,7 @@ resource "scaleway_iam_ssh_key" "this" {
   name       = each.key
   public_key = each.value.public_key
   disabled   = each.value.disabled
-  project_id = data.scaleway_account_project.this.id
+  project_id = var.project_id
 }
 
 #--------------------------------------------------------------
@@ -19,7 +19,7 @@ resource "scaleway_baremetal_server" "this" {
   for_each = local.servers
 
   zone       = var.zone
-  project_id = data.scaleway_account_project.this.id
+  project_id = var.project_id
 
   # Server identification
   name        = each.value.hostname
@@ -33,41 +33,39 @@ resource "scaleway_baremetal_server" "this" {
 
   # SSH access configuration
   ssh_key_ids = distinct(concat(
-    each.value.existing_ssh_key_ids,
+    each.value.ssh_key_ids,
     [for key in scaleway_iam_ssh_key.this : key.id]
   ))
-  install_config_afterward = each.value.install_config_afterward
+  install_config_afterward = each.value.config.install_config_afterward
 
-  # Installation credentials
-  service_user                = each.value.service_user
-  service_password            = each.value.service_password
-  service_password_wo         = each.value.service_password_wo
-  service_password_wo_version = each.value.service_password_wo_version
-  user                        = each.value.user
-  password                    = each.value.password
-  password_wo                 = each.value.password_wo
-  password_wo_version         = each.value.password_wo_version
+  # Installation credentials: passwords are ephemeral and only reach write-only arguments
+  service_user                = each.value.config.service_user
+  service_password_wo         = try(var.server_passwords[each.value.base_name].service_password, null)
+  service_password_wo_version = each.value.config.service_password_version
+  user                        = each.value.config.user
+  password_wo                 = try(var.server_passwords[each.value.base_name].password, null)
+  password_wo_version         = each.value.config.password_version
 
   # Lifecycle configuration
-  reinstall_on_config_changes = each.value.reinstall_on_config_changes
-  protected                   = each.value.protected
+  reinstall_on_config_changes = each.value.config.reinstall_on_config_changes
+  protected                   = each.value.config.protected
 
   # Install-time content
-  cloud_init   = each.value.cloud_init
-  partitioning = each.value.partitioning
+  cloud_init   = each.value.config.cloud_init
+  partitioning = each.value.config.partitioning
 
   # Server options
   dynamic "options" {
-    for_each = each.value.options
+    for_each = each.value.config.options
     content {
-      id         = options.value.id
+      id         = data.scaleway_baremetal_option.this[options.key].option_id
       expires_at = options.value.expires_at
     }
   }
 
   # Private network attachments
   dynamic "private_network" {
-    for_each = each.value.private_networks
+    for_each = each.value.config.private_networks
     content {
       id          = private_network.value.id
       ipam_ip_ids = private_network.value.ipam_ip_ids
@@ -86,8 +84,8 @@ resource "scaleway_baremetal_server" "this" {
 
   lifecycle {
     precondition {
-      condition     = length(each.value.existing_ssh_key_ids) > 0 || length(var.ssh_keys) > 0
-      error_message = "At least one SSH key must be provided via 'default_ssh_key_ids', per-server 'ssh_key_ids', or 'ssh_keys'."
+      condition     = length(each.value.ssh_key_ids) > 0 || length(var.ssh_keys) > 0
+      error_message = "At least one SSH key must be provided via 'ssh_key_ids', per-server 'ssh_key_ids', or 'ssh_keys'."
     }
   }
 }
@@ -100,7 +98,7 @@ resource "scaleway_flexible_ip" "this" {
   for_each = local.flexible_ips
 
   zone       = var.zone
-  project_id = data.scaleway_account_project.this.id
+  project_id = var.project_id
   server_id  = scaleway_baremetal_server.this[each.value.server_name].id
 
   description = each.value.description

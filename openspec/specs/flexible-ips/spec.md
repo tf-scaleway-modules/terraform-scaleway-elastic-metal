@@ -25,10 +25,10 @@ For each element of a server's `flexible_ips` list (default `[]`) the module SHA
 - **THEN** no flexible IP is planned and `flexible_ips` is an empty map
 
 ### Requirement: Flexible IP tags
-Each flexible IP SHALL carry `default_tags` merged with its own `tags` (optional, default `[]`), without duplicates.
+Each flexible IP SHALL carry the module `tags` merged with its own `tags` (optional, default `[]`), without duplicates.
 
 #### Scenario: Tags merged
-- **WHEN** `default_tags = ["prod"]` and a flexible IP sets `tags = ["prod", "edge"]`
+- **WHEN** `tags = ["prod"]` and a flexible IP sets `tags = ["prod", "edge"]`
 - **THEN** its tags are `prod` and `edge`, each once
 
 ### Requirement: Flexible IP outputs
@@ -45,3 +45,14 @@ Each flexible IP SHALL carry `default_tags` merged with its own `tags` (optional
 #### Scenario: Server name extends another
 - **WHEN** servers `web` and `web-fip-x` both exist and only `web-fip-x` has a flexible IP
 - **THEN** `flexible_ip_addresses["web"]` is an empty list
+
+### Requirement: Reverse DNS is a hostname
+A flexible IP `reverse`, when set, MUST be a fully qualified hostname of dot-separated labels (letters, digits, hyphens; each label starting and ending alphanumeric), with an optional trailing dot. When unset the module sends nothing and keeps the reverse the provider reports.
+
+#### Scenario: Reverse is not a hostname
+- **WHEN** a flexible IP sets `reverse = "not a host"`
+- **THEN** the plan fails with "reverse must be a fully qualified hostname such as api.example.com."
+
+#### Scenario: Reverse unset
+- **WHEN** `reverse` is unset
+- **THEN** no reverse is sent and a second plan after apply shows no diff
