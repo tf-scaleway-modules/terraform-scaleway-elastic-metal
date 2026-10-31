@@ -50,6 +50,11 @@ resource "scaleway_baremetal_server" "this" {
 
   # Lifecycle configuration
   reinstall_on_config_changes = each.value.reinstall_on_config_changes
+  protected                   = each.value.protected
+
+  # Install-time content
+  cloud_init   = each.value.cloud_init
+  partitioning = each.value.partitioning
 
   # Server options
   dynamic "options" {
@@ -64,7 +69,8 @@ resource "scaleway_baremetal_server" "this" {
   dynamic "private_network" {
     for_each = each.value.private_networks
     content {
-      id = private_network.value.id
+      id          = private_network.value.id
+      ipam_ip_ids = private_network.value.ipam_ip_ids
     }
   }
 

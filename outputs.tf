@@ -44,7 +44,16 @@ output "server_private_ips" {
   description = "Map of server names to the VLAN ID of each of their private network attachments"
   value = {
     for name, server in scaleway_baremetal_server.this : name => [
-      for pn in server.private_network : pn.vlan_id
+      for pn in server.private_network : pn.vlan
+    ]
+  }
+}
+
+output "server_private_ip_addresses" {
+  description = "Map of server names to their private IP addresses"
+  value = {
+    for name, server in scaleway_baremetal_server.this : name => [
+      for ip in server.private_ips : ip.address
     ]
   }
 }
