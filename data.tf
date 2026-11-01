@@ -2,11 +2,6 @@
 # Data Sources
 ################################################################################
 
-data "scaleway_account_project" "this" {
-  name            = var.project_name
-  organization_id = var.organization_id
-}
-
 #--------------------------------------------------------------
 # Baremetal Offer Lookup
 # Resolves offer names to offer IDs for each unique server definition
@@ -18,7 +13,7 @@ data "scaleway_baremetal_offer" "this" {
 
   zone                = var.zone
   name                = each.value.offer
-  subscription_period = coalesce(each.value.subscription_period, "hourly")
+  subscription_period = each.value.subscription_period
 }
 
 #--------------------------------------------------------------
@@ -33,4 +28,16 @@ data "scaleway_baremetal_os" "this" {
   zone    = var.zone
   name    = each.value.os
   version = each.value.os_version
+}
+
+#--------------------------------------------------------------
+# Server Option Lookup
+# Resolves option names to option IDs, once per distinct name
+#--------------------------------------------------------------
+
+data "scaleway_baremetal_option" "this" {
+  for_each = local.option_names
+
+  zone = var.zone
+  name = each.key
 }

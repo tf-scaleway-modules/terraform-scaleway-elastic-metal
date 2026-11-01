@@ -5,12 +5,22 @@
 # To list available offers, run:
 # scw baremetal offer list zone=fr-par-1
 
+variable "server_passwords" {
+  description = "Installation passwords per server key; set through TF_VAR_server_passwords or a CI secret"
+  type = map(object({
+    password         = optional(string)
+    service_password = optional(string)
+  }))
+  default   = {}
+  sensitive = true
+  ephemeral = true
+}
+
 module "elastic_metal" {
   source = "../.."
 
-  organization_id = "00000000-0000-0000-0000-000000000000"
-  project_name    = "default"
-  zone            = "fr-par-2"
+  project_id = "00000000-0000-0000-0000-000000000000" # omit to use the provider's default project
+  zone       = "fr-par-2"                             # omit to use the provider's default zone
 
   servers = {
     # Using count to create multiple identical servers
@@ -32,8 +42,7 @@ module "elastic_metal" {
 
     # Single server without count (or count = 1)
     # api = {
-    #   password_wo         = var.api_password # write-only, never stored in state
-    #   password_wo_version = 1                # bump to apply a new password
+    #   password_version = 1 # bump to apply a new server_passwords["api"].password
     #   offer               = "EM-A610R-NVME"
     #   os                  = "Ubuntu"
     #   os_version          = "24.04 LTS (Noble Numbat)"
@@ -41,6 +50,7 @@ module "elastic_metal" {
     #   hostname            = "api-server"              # Custom hostname (not indexed)
     #   description         = "API Gateway server"
     #   tags                = ["api", "production"]
+    #   flexible_ips        = [{ description = "API IP", reverse = "api.example.com" }] # one reverse per IP: not with count > 1
     #   protected           = true # the API refuses deletion until set back to false
     #
     #   # Cloud-init user data: no secrets, it is stored in state in clear text
@@ -78,23 +88,21 @@ module "elastic_metal" {
     #     {
     #       id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     #       # Optional: pin the private IPs (UUID or <zone>/<uuid>)
-    #       # ipam_ip_ids = ["fr-par-2/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+    #       ipam_ip_ids = ["fr-par-2/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
     #     }
     #   ]
     #
-    #   # Server options (e.g., remote access, additional storage)
-    #   # Get option IDs from offer details: scw baremetal offer get <offer-id>
-    #   options = [
-    #     {
-    #       id         = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    #       expires_at = "2025-12-31T23:59:59Z" # Optional expiration
+    #   # Server options, keyed by option name (scw baremetal option list)
+    #   options = {
+    #     "Remote Access" = {
+    #       expires_at = "2027-12-31T23:59:59Z" # Optional expiration
     #     }
-    #   ]
+    #   }
     # }
   }
 
   # Option 1: Reference existing SSH keys by ID
-  default_ssh_key_ids = []
+  ssh_key_ids = []
 
   # Option 2: Create new SSH keys (attached to all servers)
   # IMPORTANT: Replace with your real SSH public keys!
@@ -107,7 +115,11 @@ module "elastic_metal" {
     }
   }
 
-  default_tags = ["managed-by-terraform", "environment:production"]
+  tags = ["managed-by-terraform", "environment:production"]
+
+  # Installation passwords per key of 'servers', write-only and never stored in state.
+  # A new value is applied when the server's password_version changes.
+  server_passwords = var.server_passwords
 
   timeouts = {
     create = "2h"

@@ -6,7 +6,7 @@ SSH keys created by the module and the SSH key sources required by each server.
 ## Requirements
 
 ### Requirement: SSH keys created from a map
-The module SHALL create one `scaleway_iam_ssh_key` per entry of `ssh_keys`, named after the map key, with the entry's `public_key` and `disabled` (optional, default `false`), in the resolved project.
+The module SHALL create one `scaleway_iam_ssh_key` per entry of `ssh_keys`, named after the map key, with the entry's `public_key` and `disabled` (optional, default `false`), in the module's project (the provider's default project when `project_id` is null).
 
 #### Scenario: Two keys declared
 - **WHEN** `ssh_keys = { admin = { public_key = "ssh-ed25519 AAAA..." }, ci = { public_key = "ssh-rsa AAAA...", disabled = true } }`
@@ -28,18 +28,18 @@ Every `public_key` in `ssh_keys` MUST start with one of `ssh-rsa`, `ssh-ed25519`
 - **THEN** the plan fails with the same error
 
 ### Requirement: Created keys are attached to every server
-Every server SHALL receive the IDs of all SSH keys created by the module, merged with the IDs from `default_ssh_key_ids` and the server's own `ssh_key_ids`, without duplicates. The servers SHALL depend on the created SSH keys.
+Every server SHALL receive the IDs of all SSH keys created by the module, merged with the IDs from `ssh_key_ids` and the server's own `ssh_key_ids`, without duplicates. The servers SHALL depend on the created SSH keys.
 
 #### Scenario: Created and existing keys merged
-- **WHEN** `ssh_keys` declares `admin`, `default_ssh_key_ids` holds one UUID and a server sets `ssh_key_ids` with another UUID
+- **WHEN** `ssh_keys` declares `admin`, `ssh_key_ids` holds one UUID and a server sets `ssh_key_ids` with another UUID
 - **THEN** that server's `ssh_key_ids` contains the created `admin` key ID and both UUIDs, each once
 
 ### Requirement: At least one SSH key per server
-Every server MUST have at least one SSH key source: a non-empty merge of `default_ssh_key_ids` and the server's `ssh_key_ids`, or a non-empty `ssh_keys`. Otherwise the server's creation SHALL fail with a precondition error.
+Every server MUST have at least one SSH key source: a non-empty merge of `ssh_key_ids` and the server's `ssh_key_ids`, or a non-empty `ssh_keys`. Otherwise the server's creation SHALL fail with a precondition error.
 
 #### Scenario: No SSH key anywhere
-- **WHEN** a server is declared, `ssh_keys = {}`, `default_ssh_key_ids = []` and the server has no `ssh_key_ids`
-- **THEN** the plan fails with "At least one SSH key must be provided via 'default_ssh_key_ids', per-server 'ssh_key_ids', or 'ssh_keys'."
+- **WHEN** a server is declared, `ssh_keys = {}`, `ssh_key_ids = []` and the server has no `ssh_key_ids`
+- **THEN** the plan fails with "At least one SSH key must be provided via 'ssh_key_ids', per-server 'ssh_key_ids', or 'ssh_keys'."
 
 #### Scenario: Only a created key
 - **WHEN** a server is declared, `ssh_keys` has one entry and no existing key IDs are given

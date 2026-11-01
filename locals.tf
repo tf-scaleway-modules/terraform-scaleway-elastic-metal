@@ -5,62 +5,34 @@ locals {
   # count=3 with key "web" creates: web-01, web-02, web-03
   #--------------------------------------------------------------
 
-  expanded_servers = merge([
+  servers = merge([
     for name, config in var.servers : {
-      for i in range(coalesce(config.count, 1)) :
-      (coalesce(config.count, 1) > 1 ? "${name}-${format("%02d", i + 1)}" : name) => {
-        base_name                   = name
-        index                       = i + 1
-        server_count                = coalesce(config.count, 1)
-        offer                       = config.offer
-        os                          = config.os
-        os_version                  = config.os_version
-        subscription_period         = coalesce(config.subscription_period, "hourly")
-        hostname_base               = config.hostname
-        description_base            = config.description
-        tags                        = coalesce(config.tags, [])
-        ssh_key_ids                 = coalesce(config.ssh_key_ids, [])
-        install_config_afterward    = coalesce(config.install_config_afterward, false)
-        service_user                = config.service_user
-        service_password            = config.service_password
-        service_password_wo         = config.service_password_wo
-        service_password_wo_version = config.service_password_wo_version
-        user                        = config.user
-        password                    = config.password
-        password_wo                 = config.password_wo
-        password_wo_version         = config.password_wo_version
-        reinstall_on_config_changes = coalesce(config.reinstall_on_config_changes, false)
-        protected                   = config.protected
-        cloud_init                  = config.cloud_init
-        partitioning                = config.partitioning
-        options                     = coalesce(config.options, [])
-        private_networks            = coalesce(config.private_networks, [])
-        flexible_ips                = coalesce(config.flexible_ips, [])
+      for i in range(config.count) :
+      (config.count > 1 ? "${name}-${format("%02d", i + 1)}" : name) => {
+        base_name = name
+        config    = config
+        hostname = (
+          config.count > 1
+          ? "${coalesce(config.hostname, name)}-${format("%02d", i + 1)}"
+          : coalesce(config.hostname, name)
+        )
+        description = (
+          config.count > 1 && config.description != ""
+          ? "${config.description} ${format("%02d", i + 1)}"
+          : config.description
+        )
+        tags        = distinct(concat(var.tags, config.tags))
+        ssh_key_ids = distinct(concat(var.ssh_key_ids, config.ssh_key_ids))
       }
     }
   ]...)
 
   #--------------------------------------------------------------
-  # Server Configuration Processing
-  # Merges default values with per-server configuration
+  # Option Names
+  # One lookup per distinct option name across all servers
   #--------------------------------------------------------------
 
-  servers = {
-    for name, config in local.expanded_servers : name => merge(config, {
-      hostname = (
-        config.server_count > 1
-        ? "${coalesce(config.hostname_base, config.base_name)}-${format("%02d", config.index)}"
-        : coalesce(config.hostname_base, name)
-      )
-      description = (
-        config.server_count > 1 && config.description_base != ""
-        ? "${config.description_base} ${format("%02d", config.index)}"
-        : config.description_base
-      )
-      tags                 = distinct(concat(var.default_tags, config.tags))
-      existing_ssh_key_ids = distinct(concat(var.default_ssh_key_ids, config.ssh_key_ids))
-    })
-  }
+  option_names = toset(flatten([for config in var.servers : keys(config.options)]))
 
   #--------------------------------------------------------------
   # Flexible IP Flattening
@@ -69,13 +41,13 @@ locals {
   #--------------------------------------------------------------
 
   flexible_ips = merge([
-    for server_name, config in local.servers : {
-      for idx, fip in config.flexible_ips : "${server_name}-fip-${idx}" => {
+    for server_name, server in local.servers : {
+      for idx, fip in server.config.flexible_ips : "${server_name}-fip-${idx}" => {
         server_name = server_name
         description = fip.description
-        tags        = distinct(concat(var.default_tags, coalesce(fip.tags, [])))
+        tags        = distinct(concat(var.tags, fip.tags))
         reverse     = fip.reverse
-        is_ipv6     = coalesce(fip.is_ipv6, false)
+        is_ipv6     = fip.is_ipv6
       }
     }
   ]...)
