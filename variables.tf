@@ -2,29 +2,24 @@
 # Provider Configuration
 #--------------------------------------------------------------
 
-variable "organization_id" {
-  description = "Scaleway organization ID"
+variable "project_id" {
+  description = "ID of the Scaleway project that owns the SSH keys, servers and flexible IPs. Null uses the provider's default project; changing it replaces the resources"
   type        = string
+  default     = null
 
   validation {
-    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.organization_id))
-    error_message = "Organization ID must be a valid UUID."
+    condition     = var.project_id == null || can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.project_id))
+    error_message = "project_id must be a valid UUID."
   }
 }
 
-variable "project_name" {
-  description = "Name of the Scaleway project"
-  type        = string
-  default     = "default"
-}
-
 variable "zone" {
-  description = "Zone where Elastic Metal servers will be deployed"
+  description = "Zone where Elastic Metal servers are deployed (e.g. fr-par-2). Null uses the provider's default zone; changing it replaces the servers"
   type        = string
-  default     = "fr-par-2"
+  default     = null
 
   validation {
-    condition     = can(regex("^[a-z]{2}-[a-z]{3}-[0-9]$", var.zone))
+    condition     = var.zone == null || can(regex("^[a-z]{2}-[a-z]{3}-[0-9]$", var.zone))
     error_message = "Zone must be in format: xx-xxx-N (e.g., fr-par-2)."
   }
 }
@@ -47,21 +42,16 @@ variable "servers" {
     ssh_key_ids                 = optional(list(string), [])
     install_config_afterward    = optional(bool, false)
     service_user                = optional(string)
-    service_password            = optional(string)
-    service_password_wo         = optional(string) # write-only, never stored in state
-    service_password_wo_version = optional(number) # bump to apply a new service_password_wo
+    service_password_version    = optional(number) # bump to apply a new server_passwords[<key>].service_password
     user                        = optional(string)
-    password                    = optional(string)
-    password_wo                 = optional(string) # write-only, never stored in state
-    password_wo_version         = optional(number) # bump to apply a new password_wo
+    password_version            = optional(number) # bump to apply a new server_passwords[<key>].password
     reinstall_on_config_changes = optional(bool, false)
     protected                   = optional(bool, false) # true makes the API refuse deletion, so destroy fails until it is set back to false
     cloud_init                  = optional(string)      # user data, stored in state in clear text: do not embed secrets; applied at boot, needs a reboot to change
     partitioning                = optional(string)      # JSON schema, applied on install or reinstall only
-    options = optional(list(object({
-      id         = string
+    options = optional(map(object({                     # keyed by option name (scw baremetal option list)
       expires_at = optional(string)
-    })), [])
+    })), {})
     private_networks = optional(list(object({
       id          = string
       ipam_ip_ids = optional(list(string)) # pins the private IPs; IPs already assigned stay if removed later
@@ -81,12 +71,12 @@ variable "servers" {
   }
 
   validation {
-    condition     = alltrue([for k, v in var.servers : contains(["hourly", "monthly"], coalesce(v.subscription_period, "hourly"))])
+    condition     = alltrue([for k, v in var.servers : contains(["hourly", "monthly"], v.subscription_period)])
     error_message = "subscription_period must be either 'hourly' or 'monthly'."
   }
 
   validation {
-    condition     = alltrue([for k, v in var.servers : coalesce(v.count, 1) >= 1 && coalesce(v.count, 1) <= 100])
+    condition     = alltrue([for k, v in var.servers : v.count >= 1 && v.count <= 100])
     error_message = "Server count must be between 1 and 100."
   }
 
@@ -103,26 +93,46 @@ variable "servers" {
   validation {
     condition = alltrue([
       for k, v in var.servers : alltrue([
-        for pn in coalesce(v.private_networks, []) : pn.ipam_ip_ids == null || alltrue([
+        for pn in v.private_networks : pn.ipam_ip_ids == null || alltrue([
           for id in pn.ipam_ip_ids : can(regex("^([a-z]{2}-[a-z]{3}(-[0-9])?/)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", id))
         ])
       ])
     ])
     error_message = "ipam_ip_ids entries must be UUIDs, optionally prefixed by a zone or region (e.g. fr-par-2/<uuid>)."
   }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.servers : alltrue([
+        for fip in v.flexible_ips : fip.reverse == null || can(regex("^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,63}\\.?$", fip.reverse))
+      ])
+    ])
+    error_message = "reverse must be a fully qualified hostname such as api.example.com."
+  }
+}
+
+variable "server_passwords" {
+  description = "Installation passwords per key of 'servers' (shared by every server expanded from that key), sent through write-only arguments so they never land in state. Provide them through TF_VAR_server_passwords, a CI secret or a vault. A new value is applied only when the matching password_version / service_password_version of the server changes"
+  type = map(object({
+    password         = optional(string)
+    service_password = optional(string)
+  }))
+  default   = {}
+  sensitive = true
+  ephemeral = true
 }
 
 #--------------------------------------------------------------
 # SSH Key Configuration
 #--------------------------------------------------------------
 
-variable "default_ssh_key_ids" {
-  description = "Default list of existing SSH key IDs to attach to all servers (merged with per-server ssh_key_ids)"
+variable "ssh_key_ids" {
+  description = "Existing SSH key IDs to attach to all servers (merged with per-server ssh_key_ids)"
   type        = list(string)
   default     = []
 
   validation {
-    condition     = alltrue([for id in var.default_ssh_key_ids : can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", id))])
+    condition     = alltrue([for id in var.ssh_key_ids : can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", id))])
     error_message = "All SSH key IDs must be valid UUIDs."
   }
 }
@@ -145,8 +155,8 @@ variable "ssh_keys" {
 # Default Values
 #--------------------------------------------------------------
 
-variable "default_tags" {
-  description = "Default tags to apply to all servers (merged with per-server tags)"
+variable "tags" {
+  description = "Tags applied to all servers and flexible IPs (merged with their own tags)"
   type        = list(string)
   default     = []
 }

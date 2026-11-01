@@ -1,8 +1,3 @@
-output "project_id" {
-  description = "The resolved Scaleway project ID"
-  value       = module.elastic_metal.project_id
-}
-
 output "server_ids" {
   description = "IDs of the created servers"
   value       = module.elastic_metal.server_ids
@@ -18,9 +13,9 @@ output "server_ipv6s" {
   value       = module.elastic_metal.server_ipv6s
 }
 
-output "server_private_ip_addresses" {
+output "server_private_ips" {
   description = "Private IP addresses per server"
-  value       = module.elastic_metal.server_private_ip_addresses
+  value       = module.elastic_metal.server_private_ips
 }
 
 output "flexible_ip_addresses" {
