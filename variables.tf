@@ -29,7 +29,7 @@ variable "zone" {
 #--------------------------------------------------------------
 
 variable "servers" {
-  description = "Map of Elastic Metal servers to create. Use 'count' to create multiple identical servers with indexed names."
+  description = "Map of Elastic Metal servers to create. Use `count` to create multiple identical servers with indexed names. See Server Configuration in the README for every attribute."
   type = map(object({
     count                       = optional(number, 1)
     offer                       = string
@@ -42,19 +42,19 @@ variable "servers" {
     ssh_key_ids                 = optional(list(string), [])
     install_config_afterward    = optional(bool, false)
     service_user                = optional(string)
-    service_password_version    = optional(number) # bump to apply a new server_passwords[<key>].service_password
+    service_password_version    = optional(number)
     user                        = optional(string)
-    password_version            = optional(number) # bump to apply a new server_passwords[<key>].password
+    password_version            = optional(number)
     reinstall_on_config_changes = optional(bool, false)
-    protected                   = optional(bool, false) # true makes the API refuse deletion, so destroy fails until it is set back to false
-    cloud_init                  = optional(string)      # user data, stored in state in clear text: do not embed secrets; applied at boot, needs a reboot to change
-    partitioning                = optional(string)      # JSON schema, applied on install or reinstall only
-    options = optional(map(object({                     # keyed by option name (scw baremetal option list)
+    protected                   = optional(bool, false)
+    cloud_init                  = optional(string)
+    partitioning                = optional(string)
+    options = optional(map(object({
       expires_at = optional(string)
     })), {})
     private_networks = optional(list(object({
       id          = string
-      ipam_ip_ids = optional(list(string)) # pins the private IPs; IPs already assigned stay if removed later
+      ipam_ip_ids = optional(list(string))
     })), [])
     flexible_ips = optional(list(object({
       description = optional(string)
