@@ -2,7 +2,82 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - 2025-12-16
+## [2.0.1] - 2026-11-25
+- Validate the module with Terraform and pin both toolchains
+- Rewrite input and output descriptions as single-line prose so they render on the Terraform Registry
+- Send installation passwords write-only, select options by name and replace the project lookup with project_id
+
+BREAKING: v2.0.0; provider ~> 2.89.
+
+- organization_id and project_name are removed: pass project_id; zone
+  defaults to the provider zone (set zone = "fr-par-2" to keep servers).
+- default_tags becomes tags, default_ssh_key_ids becomes ssh_key_ids.
+- servers[*].password, password_wo, service_password and
+  service_password_wo are removed: passwords come from the sensitive,
+  ephemeral server_passwords input and never reach state;
+  password_wo_version/service_password_wo_version become
+  password_version/service_password_version. Set
+  reinstall_on_config_changes = false for the upgrade apply.
+- servers[*].options is a map keyed by option name (looked up once per
+  name).
+- Output project_id is removed; server_private_ips becomes server_vlan_ids
+  and server_private_ip_addresses becomes server_private_ips.
+- Flexible IP reverse must be a fully qualified hostname.
+
+See "Upgrading from v1 to v2" in the README.
+- Add protected, cloud_init, partitioning and IPAM IPs to servers; fix server_private_ips output
+- Fix server key and timeouts validation and flexible IP outputs; warn on plain passwords
+
+- Single-character server keys must now be alphanumeric.
+- timeouts values must be durations such as 30m or 1h30m.
+- flexible_ip_addresses no longer mixes the flexible IPs of web and web-fip-x.
+- A server without a description no longer fails to plan.
+- A check warns when password or service_password is used, because they land in state; password_wo and service_password_wo do not.
+- Add SECURITY.md and unit tests; the server_private_ips description now says it holds VLAN IDs.
+No upgrade action needed.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+- Key the pre-commit cache on mise.toml and .pre-commit-config.yaml
+
+The cache was keyed on the branch, so a branch kept tools installed by the previous mise, which the new one no longer puts on PATH (tofu not found). Keying it on the files that define the toolchain, as in scaleway-compute and scaleway-storage, starts a fresh cache whenever the toolchain changes and shares it across branches and tags.
+- Install mise 2026.10.17 in CI to avoid the GitHub API rate limit
+
+The pre-commit job installed an old mise that resolves every tool through api.github.com without a token, and failed with 403 rate-limit errors on the shared office runner whenever its cache was cold (new refs such as merge requests and tags). mise 2026.9.14 and later resolve releases through mise-versions.jdx.dev.
+- Run validate:specs in merge request pipelines
+
+A job without rules: only runs in branch and tag pipelines, so the merge request pipeline did not validate openspec/. rules: when: always matches the other validate jobs.
+- Adopt OpenSpec and publish the baseline specs
+
+Planning adopts OpenSpec, aligned with the other leminnov Terraform
+modules: the engineering standards come from the quality, repository and
+terraform OpenSpec stores. openspec/config.yaml follows the terraform-module profile
+(stores pinned at quality v1.2.6, repository v4.1.0, terraform v1.2.6) and
+AGENTS.md, imported by CLAUDE.md, routes to them. openspec/specs/ holds the
+baseline specification of the module as released, produced by the archived
+adopt-openspec change. The openspec-* skills are installed for Claude Code
+and OpenCode, openspec 1.14.3 and node are pinned in mise.toml with the
+spec-validate and spec-setup tasks, and the validate:specs CI job runs
+openspec validate --all --strict. The module contract is unchanged.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+- feat: add write-only installation passwords and upgrade scaleway provider to ~> 2.86
+
+- servers: add password_wo/service_password_wo (+ *_wo_version), never
+  stored in the state.
+- Require OpenTofu/Terraform >= 1.11 (write-only arguments).
+- Bump the scaleway provider constraint to ~> 2.86 (module and examples).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+- Updates example with placeholder values
+- Updates documentation and Scaleway provider version
+
+Updates the Scaleway provider version constraint in the README
+to allow versions greater than 2.64.
+
+Adds documentation for the `count` parameter for servers,
+allowing the creation of multiple identical servers.
+
+Adds `os_images` to outputs.
 - Enhances security and input validation
 
 Adds a precondition to require at least one SSH key for server
