@@ -2,15 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2025-12-25
-- Adds Elastic Metal module initial version
 
-Introduces a complete refactor of the Elastic Metal module, enabling the creation and management of bare metal servers and flexible IPs on Scaleway.
-
-It replaces the previous configuration with a more robust and flexible approach.
-## [1.0.0] - 2025-12-16
+## [2.0.1] - 2026-11-25
 - Validate the module with Terraform and pin both toolchains
 - Rewrite input and output descriptions as single-line prose so they render on the Terraform Registry
+## [2.0.0] - 2026-11-01
 - Send installation passwords write-only, select options by name and replace the project lookup with project_id
 
 BREAKING: v2.0.0; provider ~> 2.89.
@@ -31,7 +27,9 @@ BREAKING: v2.0.0; provider ~> 2.89.
 - Flexible IP reverse must be a fully qualified hostname.
 
 See "Upgrading from v1 to v2" in the README.
+## [1.3.0] - 2026-10-31
 - Add protected, cloud_init, partitioning and IPAM IPs to servers; fix server_private_ips output
+## [1.2.2] - 2026-10-28
 - Fix server key and timeouts validation and flexible IP outputs; warn on plain passwords
 
 - Single-character server keys must now be alphanumeric.
@@ -43,6 +41,7 @@ See "Upgrading from v1 to v2" in the README.
 No upgrade action needed.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+## [1.2.1] - 2026-10-28
 - Key the pre-commit cache on mise.toml and .pre-commit-config.yaml
 
 The cache was keyed on the branch, so a branch kept tools installed by the previous mise, which the new one no longer puts on PATH (tofu not found). Keying it on the files that define the toolchain, as in scaleway-compute and scaleway-storage, starts a fresh cache whenever the toolchain changes and shares it across branches and tags.
@@ -66,6 +65,7 @@ spec-validate and spec-setup tasks, and the validate:specs CI job runs
 openspec validate --all --strict. The module contract is unchanged.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+## [1.2.0] - 2026-10-14
 - feat: add write-only installation passwords and upgrade scaleway provider to ~> 2.86
 
 - servers: add password_wo/service_password_wo (+ *_wo_version), never
@@ -74,7 +74,13 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 - Bump the scaleway provider constraint to ~> 2.86 (module and examples).
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+## [1.1.0] - 2025-12-25
 - Updates example with placeholder values
+- Adds Elastic Metal module initial version
+
+Introduces a complete refactor of the Elastic Metal module, enabling the creation and management of bare metal servers and flexible IPs on Scaleway.
+
+It replaces the previous configuration with a more robust and flexible approach.
 - Updates documentation and Scaleway provider version
 
 Updates the Scaleway provider version constraint in the README
@@ -84,6 +90,7 @@ Adds documentation for the `count` parameter for servers,
 allowing the creation of multiple identical servers.
 
 Adds `os_images` to outputs.
+## [1.0.0] - 2025-12-16
 - Enhances security and input validation
 
 Adds a precondition to require at least one SSH key for server
@@ -202,4 +209,3 @@ The changes include:
 - Introduces variables for project ID, default SSH keys, default tags, and timeouts.
 - Creates outputs for server IDs, IPs, offer details, and flexible IPs.
 - Initial commit
-
