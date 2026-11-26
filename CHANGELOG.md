@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.0.1] - 2026-11-25
+## [1.1.0] - 2025-12-25
+- Adds Elastic Metal module initial version
+
+Introduces a complete refactor of the Elastic Metal module, enabling the creation and management of bare metal servers and flexible IPs on Scaleway.
+
+It replaces the previous configuration with a more robust and flexible approach.
+## [1.0.0] - 2025-12-16
 - Validate the module with Terraform and pin both toolchains
 - Rewrite input and output descriptions as single-line prose so they render on the Terraform Registry
 - Send installation passwords write-only, select options by name and replace the project lookup with project_id
